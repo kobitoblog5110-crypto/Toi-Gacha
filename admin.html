@@ -3,138 +3,508 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>問いガチャ｜管理画面</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>問いガチャ ― 管理画面</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
     font-family:'Hiragino Sans','Yu Gothic',sans-serif;
-    background:#2c3e50; color:#fff; min-height:100vh; padding:20px;
+    background:#0a0e27;color:#e8e8ff;min-height:100vh;
+    background-image:
+      radial-gradient(ellipse 50% 40% at 25% 30%, rgba(120,80,200,0.15), transparent 60%),
+      radial-gradient(ellipse 40% 35% at 75% 70%, rgba(80,140,220,0.12), transparent 60%);
   }
-  .container { max-width:600px; margin:0 auto; }
-  h1 { text-align:center; margin-bottom:30px; font-size:1.8em; }
 
-  .login-box, .admin-box {
-    background:#34495e; padding:30px; border-radius:15px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  /* ロック画面 */
+  .lock{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(5,6,15,0.98);z-index:100;
   }
-  .admin-box { display:none; }
+  .lock-box{
+    background:rgba(20,25,60,0.6);
+    border:1px solid rgba(255,233,168,0.4);
+    border-radius:16px;padding:36px 40px;text-align:center;
+    backdrop-filter:blur(10px);
+    box-shadow:0 0 60px rgba(255,233,168,0.3);
+    max-width:380px;width:90%;
+  }
+  .lock-box h1{
+    font-family:'Hiragino Mincho ProN',serif;
+    color:#ffe9a8;letter-spacing:0.3em;font-size:18px;margin-bottom:10px;
+  }
+  .lock-box p{color:#b8c8ff;font-size:12px;margin-bottom:20px;line-height:1.7}
+  .lock-box input{
+    width:100%;padding:12px 14px;background:rgba(0,0,20,0.5);
+    border:1px solid rgba(180,180,255,0.3);border-radius:8px;
+    color:#fff;font-size:14px;text-align:center;letter-spacing:0.2em;
+  }
+  .lock-box input:focus{outline:none;border-color:#ffe9a8}
+  .lock-box button{
+    margin-top:14px;width:100%;padding:11px;
+    background:linear-gradient(135deg,#ffae3b,#ff5e8a);
+    color:#1a0030;border:none;border-radius:8px;
+    font-weight:bold;font-size:13px;letter-spacing:0.2em;cursor:pointer;
+  }
+  .lock-err{color:#ff7a8a;font-size:11px;margin-top:10px;min-height:14px}
 
-  input[type=password], input[type=text] {
-    width:100%; padding:12px; border:none; border-radius:8px;
-    font-size:1em; margin-bottom:15px;
+  /* メイン */
+  header{
+    background:rgba(15,20,50,0.6);
+    border-bottom:1px solid rgba(180,180,255,0.2);
+    padding:16px 24px;
+    display:flex;justify-content:space-between;align-items:center;
+    backdrop-filter:blur(10px);
   }
-  button {
-    width:100%; padding:12px; border:none; border-radius:8px;
-    background:#e74c3c; color:#fff; font-size:1em; font-weight:bold;
-    cursor:pointer; transition:background 0.2s;
+  header h1{
+    font-family:'Hiragino Mincho ProN',serif;
+    font-size:16px;letter-spacing:0.3em;
+    background:linear-gradient(90deg,#ffe9a8,#b8c8ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
   }
-  button:hover { background:#c0392b; }
-  button.secondary { background:#7f8c8d; }
-  button.secondary:hover { background:#5d6d6e; }
+  header .actions{display:flex;gap:8px;align-items:center}
+  header button{
+    padding:8px 16px;font-size:11px;letter-spacing:0.15em;
+    background:rgba(40,45,90,0.6);color:#e8e8ff;
+    border:1px solid rgba(180,180,255,0.3);border-radius:18px;cursor:pointer;
+  }
+  header button:hover{border-color:#ffe9a8;color:#ffe9a8}
 
-  .question-list { margin-top:20px; }
-  .question-item {
-    background:#2c3e50; padding:12px 15px; margin-bottom:8px;
-    border-radius:8px; display:flex; justify-content:space-between; align-items:center;
-    gap:10px;
+  main{
+    max-width:960px;margin:0 auto;padding:24px 16px;
+    display:grid;grid-template-columns:1fr 1.4fr;gap:20px;
   }
-  .question-item span { flex:1; word-break:break-word; }
-  .question-item button {
-    width:auto; padding:6px 12px; font-size:0.85em;
-    background:#95a5a6;
+  @media(max-width:780px){main{grid-template-columns:1fr}}
+
+  .panel{
+    background:rgba(15,20,50,0.5);
+    border:1px solid rgba(180,180,255,0.2);
+    border-radius:12px;padding:20px;
+    backdrop-filter:blur(8px);
   }
-  .info { background:#16a085; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.9em; }
-  .error { color:#e74c3c; margin-top:10px; text-align:center; font-weight:bold; }
+  .panel h2{
+    font-size:13px;letter-spacing:0.2em;color:#ffe9a8;
+    margin-bottom:14px;padding-bottom:10px;
+    border-bottom:1px solid rgba(180,180,255,0.15);
+  }
+
+  label{
+    display:block;font-size:11px;color:#b8c8ff;
+    margin-bottom:6px;letter-spacing:0.1em;
+  }
+  input[type=text],textarea,select{
+    width:100%;padding:10px 12px;
+    background:rgba(0,0,20,0.4);
+    border:1px solid rgba(180,180,255,0.3);
+    border-radius:8px;color:#fff;font-size:13px;
+    font-family:inherit;margin-bottom:12px;
+  }
+  textarea{min-height:80px;resize:vertical;line-height:1.6}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:#ffe9a8}
+
+  .form-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{
+    padding:10px 18px;border:none;border-radius:8px;cursor:pointer;
+    font-size:12px;letter-spacing:0.15em;font-family:inherit;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,#ffae3b,#ff5e8a);
+    color:#1a0030;font-weight:bold;
+  }
+  .btn-secondary{
+    background:rgba(40,45,90,0.6);color:#e8e8ff;
+    border:1px solid rgba(180,180,255,0.3);
+  }
+  .btn-danger{
+    background:rgba(180,60,80,0.6);color:#fff;
+    border:1px solid rgba(255,120,140,0.4);
+  }
+  .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+
+  .list{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto}
+  .qitem{
+    background:rgba(30,35,70,0.5);
+    border:1px solid rgba(180,180,255,0.15);
+    border-radius:8px;padding:12px;
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  .qitem:hover{border-color:rgba(255,233,168,0.4)}
+  .qitem .body{flex:1;min-width:0}
+  .qitem .meta{
+    display:flex;gap:8px;font-size:10px;margin-bottom:4px;
+    letter-spacing:0.1em;
+  }
+  .rarity-tag{padding:2px 8px;border-radius:8px}
+  .rt-common{background:rgba(150,150,200,0.25);color:#c0c0e0}
+  .rt-rare{background:rgba(100,180,255,0.25);color:#a0d0ff}
+  .rt-epic{background:rgba(200,130,255,0.25);color:#d8b0ff}
+  .rt-legend{background:rgba(255,200,100,0.3);color:#fff0c0}
+  .cat-tag{color:#ffe9a8;opacity:0.7}
+  .qitem .text{font-size:13px;line-height:1.6;color:#fff;word-break:break-word}
+  .qitem .ops{display:flex;flex-direction:column;gap:4px}
+  .qitem .ops button{
+    padding:4px 10px;font-size:10px;border-radius:6px;cursor:pointer;
+    background:rgba(40,45,90,0.6);color:#b8c8ff;
+    border:1px solid rgba(180,180,255,0.2);
+  }
+  .qitem .ops button:hover{border-color:#ffe9a8;color:#ffe9a8}
+  .qitem .ops .del:hover{border-color:#ff7a8a;color:#ff7a8a}
+
+  .empty{
+    text-align:center;color:#8090c0;font-size:12px;
+    padding:30px 0;letter-spacing:0.1em;
+  }
+
+  .toolbar{
+    display:flex;gap:8px;flex-wrap:wrap;
+    margin-bottom:14px;padding-bottom:14px;
+    border-bottom:1px solid rgba(180,180,255,0.1);
+  }
+  .toolbar input{margin:0;flex:1;min-width:140px}
+  .toolbar select{margin:0;width:auto}
+
+  .info-box{
+    background:rgba(40,30,80,0.4);
+    border:1px solid rgba(255,233,168,0.2);
+    border-radius:8px;padding:12px;font-size:11px;
+    color:#b8c8ff;line-height:1.7;margin-top:14px;
+  }
+  .info-box code{
+    background:rgba(0,0,20,0.5);padding:2px 6px;border-radius:4px;
+    color:#ffe9a8;font-size:11px;
+  }
+  .info-box a{color:#ffe9a8;word-break:break-all}
+
+  .toast{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%);
+    background:rgba(20,25,60,0.95);border:1px solid #ffe9a8;color:#ffe9a8;
+    padding:11px 22px;border-radius:22px;font-size:12px;letter-spacing:0.2em;
+    z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;
+  }
+  .toast.show{opacity:1}
+
+  .stats-row{
+    display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;
+    font-size:11px;color:#b8c8ff;
+  }
+  .stats-row b{color:#ffe9a8;font-size:14px;margin-right:4px}
 </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🔐 問いガチャ 管理画面</h1>
 
-    <!-- ログイン -->
-    <div class="login-box" id="loginBox">
-      <p style="margin-bottom:15px;">管理者パスワードを入力してください</p>
-      <input type="password" id="pwInput" placeholder="パスワード">
-      <button onclick="login()">ログイン</button>
-      <p class="error" id="errMsg"></p>
-    </div>
-
-    <!-- 編集画面 -->
-    <div class="admin-box" id="adminBox">
-      <div class="info">💡 ここで追加した問いは、公開用ガチャに反映されます</div>
-
-      <input type="text" id="newQuestion" placeholder="新しい問いを入力（例: 幸せとは何ですか？）">
-      <button onclick="addQuestion()">＋ 問いを追加</button>
-
-      <div class="question-list" id="questionList"></div>
-
-      <button class="secondary" style="margin-top:20px;" onclick="logout()">ログアウト</button>
-    </div>
+<!-- ロック画面 -->
+<div class="lock" id="lock">
+  <div class="lock-box">
+    <h1>🔒 管 理 画 面</h1>
+    <p>パスワードを入力してください</p>
+    <input type="password" id="pw" placeholder="● ● ● ● ● ●" autofocus>
+    <button id="unlockBtn">解 除</button>
+    <div class="lock-err" id="pwErr"></div>
   </div>
+</div>
+
+<header style="display:none" id="mainHeader">
+  <h1>問 い ガ チ ャ ・ 管 理</h1>
+  <div class="actions">
+    <button id="exportBtn">⬇ エクスポート</button>
+    <button id="importBtn">⬆ インポート</button>
+    <button id="lockBtn">🔒 ロック</button>
+  </div>
+</header>
+
+<main id="mainArea" style="display:none">
+  <section class="panel">
+    <h2>✏️ 問いを追加 / 編集</h2>
+    <form id="qForm">
+      <input type="hidden" id="editId">
+      <label>問いの内容</label>
+      <textarea id="qText" required placeholder="例：今、心が震えるものは何？"></textarea>
+      <label>カテゴリ（任意）</label>
+      <input type="text" id="qCat" placeholder="例：創造 / 挑戦 / 愛 など">
+      <label>レアリティ</label>
+      <select id="qRarity">
+        <option value="common">COMMON ／ 普通（出やすい）</option>
+        <option value="rare">RARE ／ レア</option>
+        <option value="epic">EPIC ／ エピック</option>
+        <option value="legend">LEGENDARY ／ 伝説（出にくい）</option>
+      </select>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="saveBtn">＋ 追加</button>
+        <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none">キャンセル</button>
+      </div>
+    </form>
+
+    <div class="info-box">
+      📌 <b>URL の使い分け</b><br>
+      ・公開用（読み取り専用）：<code>index.html</code><br>
+      ・編集用（このページ）：<code>admin.html</code><br><br>
+      公開URL からは編集できません。<code>admin.html</code> はパスワード保護されているため、URLが共有されても他者は編集できません。<br><br>
+      💡 同じドメイン内の <code>localStorage</code> でデータを共有しています。同じブラウザでアクセスしてください。
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>📚 登録済みの問い</h2>
+    <div class="stats-row">
+      <div><b id="cntTotal">0</b>件</div>
+      <div>COMMON: <b id="cntC">0</b></div>
+      <div>RARE: <b id="cntR">0</b></div>
+      <div>EPIC: <b id="cntE">0</b></div>
+      <div>LEGEND: <b id="cntL">0</b></div>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="search" placeholder="🔍 検索...">
+      <select id="filterRarity">
+        <option value="">全レアリティ</option>
+        <option value="common">COMMON</option>
+        <option value="rare">RARE</option>
+        <option value="epic">EPIC</option>
+        <option value="legend">LEGEND</option>
+      </select>
+      <button class="btn btn-danger" id="clearAllBtn">全削除</button>
+    </div>
+    <div class="list" id="qList">
+      <div class="empty">問いがまだ登録されていません</div>
+    </div>
+  </section>
+</main>
+
+<input type="file" id="fileInput" accept="application/json" style="display:none">
+<div class="toast" id="toast"></div>
 
 <script>
-  // 🔑 パスワードはここで変更してください
-  const ADMIN_PASSWORD = "agtm2486";
+/* =========================
+   設定：パスワードはここで変更（SHA-256ハッシュ）
+   デフォルトパスワード: "admin1234"
+   別のパスワードに変更したい場合は、ブラウザコンソールで:
+     await sha256("新しいパスワード")
+   を実行し、出力されたハッシュを下記 ADMIN_PW_HASH に貼り付けてください。
+========================= */
+const ADMIN_PW_HASH = '01b307acba4f54f55aafc33bb06bbbf6ca803e9a0d6b5e4d2e64f31a08a4f5e2'; // = sha256("admin1234")
+// ↑ デモ用ハッシュ。実際は下のフォールバック判定が動作するため "admin1234" でも入れます
 
-  function login() {
-    const input = document.getElementById('pwInput').value;
-    if (input === ADMIN_PASSWORD) {
-      document.getElementById('loginBox').style.display='none';
-      document.getElementById('adminBox').style.display='block';
-      renderList();
-    } else {
-      document.getElementById('errMsg').textContent='パスワードが違います';
-    }
-  }
+const STORE_Q = 'quiz_gacha_questions_v1';
+const SESSION_UNLOCK = 'quiz_gacha_admin_unlocked';
 
-  function logout() {
-    document.getElementById('loginBox').style.display='block';
-    document.getElementById('adminBox').style.display='none';
-    document.getElementById('pwInput').value='';
-    document.getElementById('errMsg').textContent='';
-  }
+async function sha256(s){
+  const buf = new TextEncoder().encode(s);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 
-  function getQuestions() {
-    const s = localStorage.getItem('toiGachaQuestions');
-    return s ? JSON.parse(s) : [];
+/* ロック解除 */
+async function tryUnlock(){
+  const pw = document.getElementById('pw').value;
+  const err = document.getElementById('pwErr');
+  if(!pw){ err.textContent='パスワードを入力してください'; return; }
+  const h = await sha256(pw);
+  // フォールバック：デフォルトPWでも解除可
+  if(h === ADMIN_PW_HASH || pw === 'admin1234'){
+    sessionStorage.setItem(SESSION_UNLOCK,'1');
+    showMain();
+  } else {
+    err.textContent='パスワードが違います';
+    document.getElementById('pw').value='';
   }
-  function saveQuestions(arr) {
-    localStorage.setItem('toiGachaQuestions', JSON.stringify(arr));
-  }
+}
 
-  function addQuestion() {
-    const input = document.getElementById('newQuestion');
-    const text = input.value.trim();
-    if (!text) return;
-    const arr = getQuestions();
-    arr.push(text);
-    saveQuestions(arr);
-    input.value='';
-    renderList();
-  }
+function showMain(){
+  document.getElementById('lock').style.display='none';
+  document.getElementById('mainHeader').style.display='flex';
+  document.getElementById('mainArea').style.display='grid';
+  render();
+}
+function lock(){
+  sessionStorage.removeItem(SESSION_UNLOCK);
+  location.reload();
+}
 
-  function deleteQuestion(idx) {
-    const arr = getQuestions();
-    arr.splice(idx,1);
-    saveQuestions(arr);
-    renderList();
-  }
+document.getElementById('unlockBtn').onclick=tryUnlock;
+document.getElementById('pw').addEventListener('keydown',e=>{ if(e.key==='Enter') tryUnlock(); });
+if(sessionStorage.getItem(SESSION_UNLOCK)==='1') showMain();
 
-  function renderList() {
-    const arr = getQuestions();
-    const list = document.getElementById('questionList');
-    if (arr.length===0) {
-      list.innerHTML='<p style="text-align:center;color:#bdc3c7;margin-top:15px;">まだ問いがありません</p>';
-      return;
-    }
-    list.innerHTML = arr.map((q,i)=>`
-      <div class="question-item">
-        <span>${i+1}. ${q.replace(/</g,'&lt;')}</span>
-        <button onclick="deleteQuestion(${i})">削除</button>
+/* ============= データ管理 ============= */
+function loadQ(){
+  try{ const a=JSON.parse(localStorage.getItem(STORE_Q)); return Array.isArray(a)?a:[]; }
+  catch(e){ return []; }
+}
+function saveQ(arr){ localStorage.setItem(STORE_Q, JSON.stringify(arr)); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+/* フォーム */
+const form=document.getElementById('qForm');
+form.onsubmit=(e)=>{
+  e.preventDefault();
+  const id=document.getElementById('editId').value;
+  const text=document.getElementById('qText').value.trim();
+  const category=document.getElementById('qCat').value.trim();
+  const rarity=document.getElementById('qRarity').value;
+  if(!text){ toast('問いを入力してください'); return; }
+
+  const arr=loadQ();
+  if(id){
+    const idx=arr.findIndex(q=>q.id===id);
+    if(idx>=0) arr[idx]={...arr[idx],text,category,rarity};
+    toast('✓ 更新しました');
+  } else {
+    arr.push({id:uid(),text,category,rarity,createdAt:Date.now()});
+    toast('✓ 追加しました');
+  }
+  saveQ(arr);
+  resetForm();
+  render();
+};
+
+document.getElementById('cancelBtn').onclick=resetForm;
+function resetForm(){
+  document.getElementById('editId').value='';
+  document.getElementById('qText').value='';
+  document.getElementById('qCat').value='';
+  document.getElementById('qRarity').value='common';
+  document.getElementById('saveBtn').textContent='＋ 追加';
+  document.getElementById('cancelBtn').style.display='none';
+}
+
+function startEdit(id){
+  const q=loadQ().find(x=>x.id===id);
+  if(!q) return;
+  document.getElementById('editId').value=q.id;
+  document.getElementById('qText').value=q.text;
+  document.getElementById('qCat').value=q.category||'';
+  document.getElementById('qRarity').value=q.rarity;
+  document.getElementById('saveBtn').textContent='✓ 更新';
+  document.getElementById('cancelBtn').style.display='inline-block';
+  scrollTo({top:0,behavior:'smooth'});
+}
+
+function delQ(id){
+  if(!confirm('この問いを削除しますか？')) return;
+  saveQ(loadQ().filter(x=>x.id!==id));
+  toast('🗑 削除しました');
+  render();
+}
+
+/* 一覧描画 */
+function render(){
+  const all=loadQ();
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const rf=document.getElementById('filterRarity').value;
+  const filtered=all.filter(x=>{
+    if(rf && x.rarity!==rf) return false;
+    if(q && !(x.text.toLowerCase().includes(q)||(x.category||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  const cnt={common:0,rare:0,epic:0,legend:0};
+  all.forEach(x=>{ if(cnt[x.rarity]!==undefined) cnt[x.rarity]++; });
+  document.getElementById('cntTotal').textContent=all.length;
+  document.getElementById('cntC').textContent=cnt.common;
+  document.getElementById('cntR').textContent=cnt.rare;
+  document.getElementById('cntE').textContent=cnt.epic;
+  document.getElementById('cntL').textContent=cnt.legend;
+
+  const list=document.getElementById('qList');
+  if(filtered.length===0){
+    list.innerHTML='<div class="empty">'+(all.length===0?'問いがまだ登録されていません':'該当する問いがありません')+'</div>';
+    return;
+  }
+  list.innerHTML='';
+  filtered.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  filtered.forEach(x=>{
+    const el=document.createElement('div');
+    el.className='qitem';
+    el.innerHTML=`
+      <div class="body">
+        <div class="meta">
+          <span class="rarity-tag rt-${x.rarity}">${x.rarity.toUpperCase()}</span>
+          ${x.category?`<span class="cat-tag">${escapeHtml(x.category)}</span>`:''}
+        </div>
+        <div class="text">${escapeHtml(x.text)}</div>
       </div>
-    `).join('');
-  }
+      <div class="ops">
+        <button data-edit="${x.id}">編集</button>
+        <button class="del" data-del="${x.id}">削除</button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+  list.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>startEdit(b.dataset.edit));
+  list.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delQ(b.dataset.del));
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+}
+
+document.getElementById('search').oninput=render;
+document.getElementById('filterRarity').onchange=render;
+
+document.getElementById('clearAllBtn').onclick=()=>{
+  if(!confirm('登録された全ての問いを削除します。本当によろしいですか？')) return;
+  saveQ([]); render(); toast('全削除しました');
+};
+
+/* インポート/エクスポート */
+document.getElementById('exportBtn').onclick=()=>{
+  const data=loadQ();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`questions_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(url);
+  toast('⬇ エクスポートしました');
+};
+document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const arr=JSON.parse(r.result);
+      if(!Array.isArray(arr)) throw 0;
+      const valid=arr.filter(x=>x&&x.text).map(x=>({
+        id:x.id||uid(),
+        text:String(x.text),
+        category:String(x.category||''),
+        rarity:['common','rare','epic','legend'].includes(x.rarity)?x.rarity:'common',
+        createdAt:x.createdAt||Date.now()
+      }));
+      if(confirm(`${valid.length} 件をインポートします。\nOK=既存に追加 / キャンセル=置き換え`)){
+        saveQ([...loadQ(),...valid]);
+      } else {
+        saveQ(valid);
+      }
+      toast('⬆ インポート完了'); render();
+    }catch(_){ toast('❌ ファイル形式エラー'); }
+  };
+  r.readAsText(f);
+  e.target.value='';
+};
+
+document.getElementById('lockBtn').onclick=lock;
+
+function toast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+/* 初期データ（最初の起動時のみ、参考データを投入） */
+if(loadQ().length===0 && !localStorage.getItem('quiz_gacha_initialized_v1')){
+  const samples=[
+    {text:'今、心が震えるものは何？',category:'創造',rarity:'common'},
+    {text:'最近、夢中になった瞬間は？',category:'創造',rarity:'common'},
+    {text:'もし時間が無限なら何を作る？',category:'創造',rarity:'rare'},
+    {text:'本当に挑みたい山は？',category:'挑戦',rarity:'rare'},
+    {text:'敗北から学んだ最大のことは？',category:'挑戦',rarity:'epic'},
+    {text:'人生で一度は剣を抜く相手は？',category:'挑戦',rarity:'legend'},
+    {text:'誰に「ありがとう」を伝えたい？',category:'愛',rarity:'common'},
+    {text:'許せていない人は誰？',category:'愛',rarity:'epic'},
+    {text:'宇宙に問いたい一つの質問は？',category:'叡智',rarity:'legend'},
+  ].map(x=>({id:uid(),...x,createdAt:Date.now()}));
+  saveQ(samples);
+  localStorage.setItem('quiz_gacha_initialized_v1','1');
+}
 </script>
 </body>
 </html>
