@@ -1,1 +1,1319 @@
+<!-- File: index.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>✨ 問いガチャ - 宇宙の問い ✨</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { overflow-x:hidden; }
+  body {
+    font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+    background: #0a0420;
+    min-height: 100vh; display:flex; justify-content:center; align-items:center;
+    user-select:none; padding:20px 10px;
+    position:relative; color:#fff;
+  }
 
+  /* === 宇宙背景 === */
+  .universe {
+    position:fixed; inset:0; z-index:0;
+    background: 
+      radial-gradient(ellipse at 20% 30%, rgba(120,60,200,0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, rgba(60,120,200,0.35) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(200,80,180,0.2) 0%, transparent 60%),
+      linear-gradient(180deg, #0a0420 0%, #1a0838 50%, #0a0420 100%);
+  }
+  .universe.lucky {
+    background: 
+      radial-gradient(ellipse at 20% 30%, rgba(255,180,80,0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, rgba(255,150,200,0.35) 0%, transparent 50%),
+      linear-gradient(180deg, #2a0838 0%, #3a1858 50%, #2a0838 100%);
+  }
+  .star-bg {
+    position:absolute; width:2px; height:2px;
+    background:#fff; border-radius:50%;
+    box-shadow: 0 0 6px #fff;
+    animation: twinkle var(--dur, 3s) ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%,100% { opacity:0.3; transform:scale(0.8); }
+    50% { opacity:1; transform:scale(1.3); }
+  }
+  .shooting-star {
+    position:absolute; width:120px; height:1px;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    animation: shoot 4s ease-out infinite;
+    opacity:0;
+  }
+  @keyframes shoot {
+    0% { transform: translate(-200px, 0) rotate(20deg); opacity:0; }
+    10% { opacity:1; }
+    100% { transform: translate(100vw, 50vh) rotate(20deg); opacity:0; }
+  }
+
+  /* === HUD（上部ステータス） === */
+  .hud {
+    position:fixed; top:10px; left:10px; right:10px;
+    z-index:50;
+    display:flex; justify-content:space-between; gap:8px;
+    flex-wrap:wrap;
+  }
+  .hud-item {
+    background: rgba(20,10,50,0.7);
+    border: 1px solid rgba(255,215,0,0.4);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75em;
+    color:#ffd700;
+    backdrop-filter: blur(6px);
+    display:flex; align-items:center; gap:5px;
+    cursor:pointer;
+    transition: all 0.2s;
+  }
+  .hud-item:hover { background: rgba(60,30,100,0.8); transform:translateY(-2px); }
+  .hud-item .icon { font-size:1.1em; }
+  .hud-item .value { color:#fff; font-weight:bold; }
+
+  /* ラッキータイムバナー */
+  .lucky-banner {
+    position:fixed; top:50%; left:50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #ffd700, #ff9ed8);
+    color:#2a0040;
+    padding: 20px 40px;
+    border-radius: 30px;
+    font-size: 1.5em;
+    font-weight: bold;
+    z-index: 400;
+    display:none;
+    box-shadow: 0 0 60px rgba(255,215,0,0.8);
+    animation: luckyPulse 0.6s ease-in-out infinite;
+  }
+  .lucky-banner.show { display:block; }
+  @keyframes luckyPulse {
+    0%,100% { transform: translate(-50%,-50%) scale(1); }
+    50% { transform: translate(-50%,-50%) scale(1.05); }
+  }
+
+  /* === メイン === */
+  .container { 
+    text-align:center; z-index:2; position:relative; 
+    max-width: 480px; width: 100%;
+    margin-top: 30px;
+  }
+
+  .crown {
+    font-size:1.8em; margin-bottom:5px;
+    filter: drop-shadow(0 0 15px rgba(255,215,100,0.8));
+    animation: floatCrown 4s ease-in-out infinite;
+  }
+  @keyframes floatCrown {
+    0%,100% { transform:translateY(0); }
+    50% { transform:translateY(-8px); }
+  }
+
+  h1 {
+    font-size:2.4em; margin-bottom:8px;
+    background: linear-gradient(135deg, #fff5b8 0%, #ffd700 30%, #ff9ed8 60%, #b8a8ff 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing:0.15em; font-weight: 300;
+    filter: drop-shadow(0 0 20px rgba(255,180,220,0.4));
+  }
+  h1 span { font-weight: 600; }
+
+  .subtitle { 
+    color:#d8c8ff; margin-bottom:20px; font-size:0.85em;
+    letter-spacing:0.3em; opacity:0.8;
+  }
+  .subtitle::before, .subtitle::after { content:'✦ '; color:#ffd700; }
+  .subtitle::after { content:' ✦'; }
+
+  /* 星座ゲージ */
+  .constellation-gauge {
+    margin: 0 auto 25px; max-width:300px;
+    background: rgba(20,10,50,0.6);
+    border: 1px solid rgba(255,215,0,0.3);
+    padding: 10px 15px; border-radius: 20px;
+    backdrop-filter: blur(5px);
+  }
+  .gauge-label { font-size:0.75em; color:#d8c8ff; margin-bottom:6px; letter-spacing:0.15em; }
+  .gauge-stars { display:flex; justify-content:space-between; gap:3px; }
+  .gauge-stars span {
+    flex:1; text-align:center;
+    color: rgba(255,255,255,0.2); font-size:1em;
+    transition: all 0.4s;
+  }
+  .gauge-stars span.lit {
+    color: #ffd700;
+    text-shadow: 0 0 10px #ffd700;
+    transform: scale(1.2);
+  }
+
+  /* 装置 */
+  .device-wrapper { position:relative; width:300px; margin:0 auto; perspective: 1000px; }
+  .aura {
+    position:absolute; inset:-40px;
+    background: radial-gradient(circle, rgba(255,200,255,0.3) 0%, rgba(180,150,255,0.15) 30%, transparent 70%);
+    border-radius:50%;
+    animation: pulseAura 3s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes pulseAura {
+    0%,100% { transform:scale(1); opacity:0.6; }
+    50% { transform:scale(1.15); opacity:1; }
+  }
+  .aura.intense { 
+    animation: pulseAura 0.4s ease-in-out infinite;
+    background: radial-gradient(circle, rgba(255,180,220,0.6) 0%, rgba(200,150,255,0.4) 30%, transparent 70%);
+  }
+  .aura.ssr {
+    background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,100,200,0.5) 40%, transparent 70%);
+    animation: pulseAura 0.3s ease-in-out infinite;
+  }
+
+  .orb {
+    width:260px; height:260px; margin:0 auto;
+    position:relative; border-radius:50%;
+    background: 
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.4) 0%, transparent 30%),
+      radial-gradient(circle at 70% 70%, rgba(150,100,200,0.4) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(40,20,80,0.95) 0%, rgba(20,10,50,0.95) 60%, rgba(10,5,30,0.98) 100%);
+    box-shadow: 
+      inset -20px -30px 60px rgba(0,0,0,0.6),
+      inset 20px 20px 40px rgba(255,200,255,0.15),
+      0 0 60px rgba(180,120,255,0.4);
+    overflow:hidden; cursor:grab;
+    transition: box-shadow 0.5s;
+  }
+  .orb:active { cursor:grabbing; }
+  .orb.glowing {
+    box-shadow: 
+      inset -20px -30px 60px rgba(0,0,0,0.4),
+      inset 20px 20px 40px rgba(255,200,255,0.3),
+      0 0 100px rgba(255,180,220,0.8),
+      0 0 200px rgba(200,150,255,0.5);
+  }
+  .orb::before {
+    content:''; position:absolute;
+    top:15px; left:35px; width:70px; height:55px;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.5), transparent 70%);
+    border-radius:50%;
+    filter: blur(3px); pointer-events:none; z-index:5;
+  }
+
+  .inner-star {
+    position:absolute; width:4px; height:4px;
+    background:#fff; border-radius:50%;
+    box-shadow: 0 0 8px #fff, 0 0 16px currentColor;
+    animation: orbitStar var(--dur, 8s) linear infinite;
+  }
+  .inner-star.s1 { color:#ffd700; }
+  .inner-star.s2 { color:#ff9ed8; }
+  .inner-star.s3 { color:#b8a8ff; }
+  .inner-star.s4 { color:#a8e6f5; }
+  .inner-star.s5 { color:#fff5b8; }
+  @keyframes orbitStar {
+    0% { transform: rotate(0) translateX(var(--r, 80px)) rotate(0); }
+    100% { transform: rotate(360deg) translateX(var(--r, 80px)) rotate(-360deg); }
+  }
+  .orb.spinning .inner-star { animation-duration: 0.8s; }
+
+  .core {
+    position:absolute; top:50%; left:50%;
+    width:30px; height:30px;
+    background: radial-gradient(circle, #fff 0%, #ffd700 30%, transparent 70%);
+    border-radius:50%; transform: translate(-50%,-50%);
+    filter: blur(2px);
+    animation: corePulse 2s ease-in-out infinite;
+  }
+  @keyframes corePulse {
+    0%,100% { opacity:0.6; transform: translate(-50%,-50%) scale(1); }
+    50% { opacity:1; transform: translate(-50%,-50%) scale(1.4); }
+  }
+
+  .ring-section { position:relative; width:280px; margin:-30px auto 0; z-index:2; }
+  .ornate-ring {
+    width:100%; height:45px;
+    background: linear-gradient(180deg, #ffd700 0%, #b8860b 30%, #8b6508 50%, #b8860b 70%, #ffd700 100%);
+    border-radius: 8px; position:relative;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -3px 6px rgba(0,0,0,0.4), 0 5px 20px rgba(255,180,100,0.4);
+  }
+  .ring-stars {
+    position:absolute; inset:0;
+    display:flex; justify-content:space-around; align-items:center;
+    padding: 0 20px;
+  }
+  .ring-stars span { color: #4a2800; font-size: 1em; }
+
+  .stand {
+    width:280px; margin:0 auto;
+    background: 
+      repeating-linear-gradient(90deg, transparent 0px, rgba(60,30,10,0.4) 1px, transparent 3px, transparent 15px),
+      linear-gradient(180deg, #4a2818 0%, #2d1808 50%, #1a0d04 100%);
+    padding: 22px 18px 26px;
+    border-radius: 0 0 12px 12px;
+    box-shadow: inset 0 3px 6px rgba(255,180,120,0.15), inset 0 -8px 20px rgba(0,0,0,0.6), 0 15px 40px rgba(0,0,0,0.6);
+    position:relative;
+  }
+  .stand::before {
+    content:''; position:absolute;
+    top:0; left:10px; right:10px; height:3px;
+    background: linear-gradient(90deg, transparent, #ffd700 20%, #ffd700 80%, transparent);
+    border-radius:2px;
+  }
+
+  .window-frame {
+    background: linear-gradient(135deg, #ffd700, #b8860b);
+    padding:4px; border-radius:10px;
+    box-shadow: inset 0 2px 3px rgba(255,255,255,0.5), 0 3px 8px rgba(0,0,0,0.5);
+  }
+  .window {
+    width:100%; height:80px;
+    background: radial-gradient(ellipse at center, rgba(80,40,150,0.4) 0%, rgba(20,10,50,0.95) 70%);
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; position:relative;
+    box-shadow: inset 0 5px 15px rgba(0,0,0,0.8);
+  }
+  .window-text {
+    color:#ffd700; font-size:0.95em; font-weight:bold;
+    text-align:center; padding:5px;
+    text-shadow: 0 0 10px rgba(255,215,0,0.8);
+    letter-spacing:0.1em; z-index:2;
+  }
+
+  .star-drop {
+    position:absolute;
+    width:50px; height:50px;
+    top:-60px; left:50%;
+    transform:translateX(-50%);
+    opacity:0; z-index:3;
+  }
+  .star-drop svg { width:100%; height:100%; filter: drop-shadow(0 0 12px currentColor); }
+  .star-drop.drop { animation: starFall 1.6s cubic-bezier(0.4, 0, 0.6, 1) forwards; }
+  @keyframes starFall {
+    0% { top:-60px; opacity:0; transform:translateX(-50%) rotate(0) scale(0.5); }
+    15% { opacity:1; }
+    50% { top:15px; transform:translateX(-50%) rotate(360deg) scale(1.2); }
+    100% { top:30px; opacity:1; transform:translateX(-50%) rotate(720deg) scale(1); }
+  }
+
+  .tap-hint {
+    margin-top:22px; color: #ffd8f0;
+    font-size:0.95em; letter-spacing:0.15em;
+  }
+  .tap-hint .pulse { display:inline-block; animation: hintPulse 1.5s ease-in-out infinite; }
+  @keyframes hintPulse {
+    0%,100% { opacity:0.5; transform:scale(1); }
+    50% { opacity:1; transform:scale(1.1); }
+  }
+
+  .device-wrapper.shaking { animation: deviceShake 0.1s ease-in-out infinite; }
+  @keyframes deviceShake {
+    0%,100% { transform:translate(0,0) rotate(0); }
+    25% { transform:translate(-3px,-1px) rotate(-0.5deg); }
+    75% { transform:translate(3px,1px) rotate(0.5deg); }
+  }
+
+  /* === レアリティ表示 === */
+  .rarity-badge {
+    display:inline-block;
+    padding: 3px 12px; border-radius: 12px;
+    font-size: 0.75em; font-weight: bold;
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+  .rarity-C { background:#888; color:#fff; }
+  .rarity-UC { background:linear-gradient(135deg, #4ec9b0, #2a8870); color:#fff; }
+  .rarity-R { background:linear-gradient(135deg, #4a90e2, #2c5fa3); color:#fff; box-shadow:0 0 10px rgba(74,144,226,0.6); }
+  .rarity-SR { background:linear-gradient(135deg, #b06ed8, #6c3a9c); color:#fff; box-shadow:0 0 15px rgba(176,110,216,0.7); }
+  .rarity-SSR { 
+    background:linear-gradient(135deg, #ffd700, #ff9ed8, #ffd700); 
+    background-size: 200% 200%;
+    color:#2a0040;
+    animation: ssrShine 2s ease infinite;
+    box-shadow:0 0 20px rgba(255,215,0,0.8);
+  }
+  @keyframes ssrShine {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* === モーダル === */
+  .modal {
+    position:fixed; inset:0;
+    background: radial-gradient(circle at center, rgba(20,10,50,0.85) 0%, rgba(5,2,15,0.95) 100%);
+    display:none; justify-content:center; align-items:center; z-index:300;
+    padding:20px; backdrop-filter: blur(10px);
+  }
+  .modal.show { display:flex; animation: fadeIn 0.5s; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  .modal-content {
+    background: 
+      radial-gradient(circle at top, rgba(80,40,150,0.3), transparent 60%),
+      linear-gradient(135deg, rgba(30,15,60,0.95) 0%, rgba(15,8,40,0.95) 100%);
+    padding: 50px 30px 35px;
+    border-radius: 25px;
+    max-width: 440px; width:100%;
+    text-align:center; position:relative;
+    animation: scrollIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 60px rgba(180,120,255,0.5);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .modal-content.ssr-modal {
+    box-shadow: 0 0 80px rgba(255,215,0,0.8), 0 0 160px rgba(255,180,220,0.5);
+  }
+  @keyframes scrollIn {
+    0% { transform:scale(0.5) rotate(-5deg); opacity:0; filter:blur(10px); }
+    100% { transform:scale(1) rotate(0); opacity:1; filter:blur(0); }
+  }
+  .modal-content::before {
+    content:''; position:absolute; inset: -2px;
+    background: linear-gradient(135deg, #ffd700, #ff9ed8, #b8a8ff, #ffd700);
+    border-radius:25px; z-index:-1;
+    background-size: 300% 300%;
+    animation: gradientShift 4s ease infinite;
+  }
+  @keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .modal-crown {
+    position:absolute; top:-30px; left:50%;
+    transform:translateX(-50%); font-size:3em;
+    filter: drop-shadow(0 0 15px rgba(255,215,0,0.8));
+    animation: crownFloat 2s ease-in-out infinite;
+  }
+  @keyframes crownFloat {
+    0%,100% { transform:translateX(-50%) translateY(0) rotate(-3deg); }
+    50% { transform:translateX(-50%) translateY(-6px) rotate(3deg); }
+  }
+
+  .new-badge {
+    position:absolute; top:15px; right:15px;
+    background: linear-gradient(135deg, #ff4444, #ff8866);
+    color:#fff; padding: 4px 10px;
+    border-radius: 12px; font-size: 0.7em;
+    font-weight:bold; letter-spacing:0.1em;
+    animation: newPulse 1s ease-in-out infinite;
+    display:none;
+  }
+  .new-badge.show { display:block; }
+  @keyframes newPulse {
+    0%,100% { transform:scale(1); }
+    50% { transform:scale(1.15); }
+  }
+
+  .question-label {
+    color: #ffd700; font-size:0.85em; margin-bottom: 12px;
+    letter-spacing:0.4em;
+  }
+  .question-label::before, .question-label::after { content:'✦'; margin: 0 12px; color:#ff9ed8; }
+
+  .question-text {
+    font-size:1.35em; color:#fff; line-height:1.8;
+    margin-bottom:25px; font-weight:500;
+    padding:22px 18px;
+    background: rgba(255,255,255,0.04);
+    border-radius:15px;
+    border: 1px solid rgba(255,215,0,0.3);
+  }
+  
+  .reward-info {
+    background: rgba(255,215,0,0.1);
+    border: 1px solid rgba(255,215,0,0.3);
+    padding: 10px; border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 0.85em; color: #ffd700;
+  }
+  .reward-info .reward-item { margin: 3px 0; }
+
+  .btn-group { display:flex; gap:12px; flex-direction:column; }
+  .btn {
+    padding:14px 22px; border:none; border-radius:30px;
+    font-size:1em; font-weight:bold; cursor:pointer;
+    transition:all 0.3s; font-family:inherit;
+    letter-spacing:0.1em; position:relative; overflow:hidden;
+  }
+  .btn::before {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%); transition: transform 0.6s;
+  }
+  .btn:hover::before { transform: translateX(100%); }
+  .btn:hover { transform:translateY(-3px); }
+  .btn:active { transform:translateY(0); }
+  .btn-primary {
+    background: linear-gradient(135deg, #ffd700 0%, #ff9ed8 50%, #b8a8ff 100%);
+    color:#2a0040;
+    box-shadow: 0 5px 20px rgba(255,180,220,0.5);
+  }
+  .btn-secondary {
+    background: rgba(255,255,255,0.08); color:#fff;
+    border:1px solid rgba(255,215,0,0.4);
+    backdrop-filter: blur(5px);
+  }
+
+  /* === 図鑑モーダル === */
+  .panel-modal {
+    position:fixed; inset:0;
+    background: rgba(5,2,15,0.95);
+    display:none; z-index:350;
+    overflow-y:auto; padding:60px 15px 30px;
+    backdrop-filter: blur(10px);
+  }
+  .panel-modal.show { display:block; animation: fadeIn 0.4s; }
+  .panel-content {
+    max-width: 600px; margin: 0 auto;
+    background: linear-gradient(135deg, rgba(30,15,60,0.95) 0%, rgba(15,8,40,0.95) 100%);
+    border-radius: 20px; padding: 25px 20px;
+    border: 1px solid rgba(255,215,0,0.4);
+  }
+  .panel-close {
+    position:fixed; top:15px; right:15px;
+    background: rgba(255,255,255,0.1); border:1px solid rgba(255,215,0,0.4);
+    color:#fff; width:40px; height:40px; border-radius:50%;
+    font-size:1.3em; cursor:pointer; z-index:360;
+    backdrop-filter: blur(5px);
+  }
+  .panel-title {
+    color:#ffd700; text-align:center; font-size:1.4em;
+    letter-spacing:0.2em; margin-bottom:20px;
+  }
+  .panel-stats {
+    display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;
+    margin-bottom:20px;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,215,0,0.3);
+    padding: 12px; border-radius: 12px; text-align:center;
+  }
+  .stat-card .label { font-size:0.75em; color:#d8c8ff; margin-bottom:4px; }
+  .stat-card .value { font-size:1.4em; color:#ffd700; font-weight:bold; }
+
+  .codex-list { display:flex; flex-direction:column; gap:8px; }
+  .codex-item {
+    background: rgba(255,255,255,0.04);
+    padding: 12px 15px; border-radius: 10px;
+    border-left: 3px solid #888;
+    display:flex; align-items:center; gap:10px;
+    font-size:0.9em;
+    transition:all 0.2s;
+  }
+  .codex-item:hover { background: rgba(255,255,255,0.08); }
+  .codex-item.locked { opacity: 0.4; font-style:italic; }
+  .codex-item.C { border-left-color:#888; }
+  .codex-item.UC { border-left-color:#4ec9b0; }
+  .codex-item.R { border-left-color:#4a90e2; }
+  .codex-item.SR { border-left-color:#b06ed8; }
+  .codex-item.SSR { 
+    border-left-color:#ffd700; 
+    background: rgba(255,215,0,0.1);
+  }
+  .codex-rare { 
+    font-size:0.65em; padding:2px 8px; border-radius:8px;
+    flex-shrink:0;
+  }
+  .codex-text { flex:1; word-break:break-word; }
+
+  .achievements-list { display:flex; flex-direction:column; gap:8px; margin-top:15px; }
+  .achievement {
+    background: rgba(255,255,255,0.04);
+    padding: 10px 15px; border-radius: 10px;
+    display:flex; align-items:center; gap:12px;
+    font-size: 0.85em;
+  }
+  .achievement.unlocked {
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,158,216,0.1));
+    border: 1px solid rgba(255,215,0,0.4);
+  }
+  .achievement.locked { opacity: 0.4; }
+  .achievement .ach-icon { font-size: 1.5em; }
+  .achievement .ach-info { flex:1; }
+  .achievement .ach-name { font-weight: bold; color:#ffd700; }
+  .achievement .ach-desc { font-size:0.85em; color:#d8c8ff; margin-top:2px; }
+
+  .tab-bar {
+    display:flex; gap:5px; margin-bottom:15px;
+    border-bottom: 1px solid rgba(255,215,0,0.3);
+  }
+  .tab {
+    flex:1; padding: 8px; text-align:center;
+    background: none; border:none; color:#888;
+    cursor:pointer; font-family:inherit; font-size:0.9em;
+    border-bottom: 2px solid transparent;
+    transition:all 0.2s;
+  }
+  .tab.active { color:#ffd700; border-bottom-color: #ffd700; }
+
+  .empty-msg {
+    text-align:center; padding:40px 20px;
+    color:#d8c8ff; font-style:italic;
+  }
+
+  /* レベルアップ通知 */
+  .levelup-notice {
+    position:fixed; top:50%; left:50%;
+    transform:translate(-50%,-50%) scale(0);
+    background: linear-gradient(135deg, #ffd700, #ff9ed8);
+    color:#2a0040; padding:20px 40px;
+    border-radius:20px; font-size:1.3em; font-weight:bold;
+    z-index:500; box-shadow:0 0 60px rgba(255,215,0,0.8);
+    text-align:center;
+  }
+  .levelup-notice.show {
+    animation: levelup 2.5s ease-out forwards;
+  }
+  @keyframes levelup {
+    0% { transform:translate(-50%,-50%) scale(0) rotate(-180deg); opacity:0; }
+    20% { transform:translate(-50%,-50%) scale(1.2) rotate(0); opacity:1; }
+    30% { transform:translate(-50%,-50%) scale(1) rotate(0); }
+    80% { opacity:1; }
+    100% { transform:translate(-50%,-50%) scale(1) rotate(0); opacity:0; }
+  }
+
+  .sparkle {
+    position:fixed; pointer-events:none; z-index:250;
+    font-size:1.8em;
+  }
+
+  /* トースト通知 */
+  .toast {
+    position:fixed; bottom:20px; left:50%;
+    transform:translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, rgba(30,15,60,0.95), rgba(60,30,100,0.95));
+    color:#fff; padding:12px 25px; border-radius:25px;
+    border:1px solid rgba(255,215,0,0.5);
+    font-size:0.9em; z-index:600;
+    box-shadow:0 5px 20px rgba(0,0,0,0.5);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width:90%; text-align:center;
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:380px) {
+    .device-wrapper { width:280px; }
+    .orb { width:230px; height:230px; }
+    .ring-section, .stand { width:250px; }
+    h1 { font-size:1.9em; }
+    .hud-item { font-size:0.7em; padding:5px 10px; }
+  }
+</style>
+</head>
+<body>
+  <div class="universe" id="universe"></div>
+
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-item" onclick="openPanel('codex')">
+      <span class="icon">📖</span>
+      <span>図鑑</span>
+      <span class="value" id="hudCodex">0/0</span>
+    </div>
+    <div class="hud-item" onclick="openPanel('stats')">
+      <span class="icon">⭐</span>
+      <span>Lv.</span>
+      <span class="value" id="hudLevel">1</span>
+    </div>
+    <div class="hud-item" onclick="openPanel('achieve')">
+      <span class="icon">🏆</span>
+      <span class="value" id="hudAchieve">0/8</span>
+    </div>
+  </div>
+
+  <!-- ラッキータイムバナー -->
+  <div class="lucky-banner" id="luckyBanner">✨ ラッキータイム！ ✨<br><span style="font-size:0.6em">レア確率2倍</span></div>
+
+  <!-- レベルアップ通知 -->
+  <div class="levelup-notice" id="levelupNotice"></div>
+
+  <div class="container">
+    <div class="crown">👑</div>
+    <h1>問<span>ガチャ</span></h1>
+    <p class="subtitle">星 か ら 授 か る 、 答 え の な い 問 い</p>
+
+    <!-- 星座ゲージ -->
+    <div class="constellation-gauge">
+      <div class="gauge-label">★ 星座ゲージ <span id="gaugeCount" style="color:#ffd700;">0</span> / 12</div>
+      <div class="gauge-stars" id="gaugeStars"></div>
+    </div>
+
+    <div class="device-wrapper" id="device">
+      <div class="aura" id="aura"></div>
+      <div class="orb" id="orb">
+        <div class="core"></div>
+      </div>
+      <div class="ring-section">
+        <div class="ornate-ring">
+          <div class="ring-stars">
+            <span>✦</span><span>✧</span><span>✦</span><span>✧</span>
+            <span>✦</span><span>✧</span><span>✦</span>
+          </div>
+        </div>
+      </div>
+      <div class="stand">
+        <div class="window-frame">
+          <div class="window">
+            <div class="window-text" id="windowText">✦ 球に触れて願いを ✦</div>
+            <div class="star-drop" id="starDrop">
+              <svg viewBox="0 0 50 50">
+                <polygon points="25,2 31,18 48,19 34,30 39,47 25,38 11,47 16,30 2,19 19,18" fill="currentColor" stroke="#fff" stroke-width="1"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="tap-hint">
+      <span class="pulse">✦</span> 水 晶 球 を タ ッ プ <span class="pulse">✦</span>
+    </p>
+  </div>
+
+  <!-- 結果モーダル -->
+  <div class="modal" id="modal">
+    <div class="modal-content" id="modalContent">
+      <div class="modal-crown" id="modalCrown">✨</div>
+      <div class="new-badge" id="newBadge">NEW!</div>
+      <div class="rarity-badge rarity-C" id="rarityBadge">COMMON</div>
+      <div class="question-label">星 か ら の 問 い</div>
+      <div class="question-text" id="questionText"></div>
+      <div class="reward-info" id="rewardInfo"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="spinAgain()">✦ もう一度、星を呼ぶ ✦</button>
+        <button class="btn btn-secondary" onclick="backToTitle()">夜空に戻る</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- パネル（図鑑/統計/実績） -->
+  <button class="panel-close" id="panelClose" onclick="closePanel()" style="display:none;">×</button>
+  <div class="panel-modal" id="panelModal">
+    <div class="panel-content">
+      <div class="tab-bar">
+        <button class="tab active" data-tab="codex" onclick="switchTab('codex')">📖 図鑑</button>
+        <button class="tab" data-tab="stats" onclick="switchTab('stats')">📊 統計</button>
+        <button class="tab" data-tab="achieve" onclick="switchTab('achieve')">🏆 実績</button>
+      </div>
+
+      <div id="tabCodex">
+        <div class="panel-title">問 い 図 鑑</div>
+        <div class="codex-list" id="codexList"></div>
+      </div>
+
+      <div id="tabStats" style="display:none;">
+        <div class="panel-title">あ な た の 記 録</div>
+        <div class="panel-stats">
+          <div class="stat-card"><div class="label">総引数</div><div class="value" id="statTotal">0</div></div>
+          <div class="stat-card"><div class="label">レベル</div><div class="value" id="statLevel">1</div></div>
+          <div class="stat-card"><div class="label">きらめき</div><div class="value" id="statPoints">0</div></div>
+          <div class="stat-card"><div class="label">コンプ率</div><div class="value" id="statRate">0%</div></div>
+          <div class="stat-card"><div class="label">SSR獲得</div><div class="value" id="statSSR">0</div></div>
+          <div class="stat-card"><div class="label">最大連続</div><div class="value" id="statStreak">0</div></div>
+        </div>
+        <button class="btn btn-secondary" style="width:100%; margin-top:15px;" onclick="resetData()">⚠️ データをリセット</button>
+      </div>
+
+      <div id="tabAchieve" style="display:none;">
+        <div class="panel-title">実 績 一 覧</div>
+        <div class="achievements-list" id="achList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- トースト -->
+  <div class="toast" id="toast"></div>
+
+<script>
+  // ===== 背景生成 =====
+  const universe = document.getElementById('universe');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star-bg';
+    s.style.left = Math.random()*100 + '%';
+    s.style.top = Math.random()*100 + '%';
+    s.style.setProperty('--dur', (2 + Math.random()*3) + 's');
+    s.style.animationDelay = Math.random()*3 + 's';
+    if (Math.random() > 0.7) { s.style.width = '3px'; s.style.height = '3px'; }
+    universe.appendChild(s);
+  }
+  for (let i = 0; i < 3; i++) {
+    const ss = document.createElement('div');
+    ss.className = 'shooting-star';
+    ss.style.top = (Math.random()*40) + '%';
+    ss.style.animationDelay = (i*5 + Math.random()*3) + 's';
+    universe.appendChild(ss);
+  }
+
+  // ===== 水晶球内部の星 =====
+  const orb = document.getElementById('orb');
+  for (let i = 0; i < 12; i++) {
+    const star = document.createElement('div');
+    const colors = ['s1','s2','s3','s4','s5'];
+    star.className = 'inner-star ' + colors[i % 5];
+    const radius = 35 + Math.random()*65;
+    const duration = 6 + Math.random()*8;
+    star.style.setProperty('--r', radius + 'px');
+    star.style.setProperty('--dur', duration + 's');
+    star.style.left = '50%';
+    star.style.top = '50%';
+    star.style.animationDelay = (-Math.random()*duration) + 's';
+    orb.appendChild(star);
+  }
+
+  // ===== データ管理 =====
+  const STORAGE_KEY = 'toiGachaQuestions';
+  const PLAYER_KEY = 'toiGachaPlayer';
+
+  function getQuestions() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const arr = JSON.parse(stored);
+      return arr.length > 0 ? arr : [];
+    }
+    return [];
+  }
+
+  function getPlayer() {
+    const stored = localStorage.getItem(PLAYER_KEY);
+    if (stored) return JSON.parse(stored);
+    return {
+      total: 0,
+      points: 0,
+      collected: {},  // {問いテキスト: {rarity, count, firstAt}}
+      rarityCount: { C:0, UC:0, R:0, SR:0, SSR:0 },
+      gauge: 0,
+      level: 1,
+      maxStreak: 0,
+      currentStreak: 0,
+      achievements: {},
+      lastDaily: null,
+      luckyTime: false,
+      luckyEnd: 0
+    };
+  }
+  function savePlayer(p) {
+    localStorage.setItem(PLAYER_KEY, JSON.stringify(p));
+  }
+  let player = getPlayer();
+
+  // ===== 実績定義 =====
+  const ACHIEVEMENTS = [
+    { id:'first', icon:'🌟', name:'最初の問い', desc:'初めて問いを引いた', check:p => p.total >= 1 },
+    { id:'ten', icon:'🎯', name:'冒険のはじまり', desc:'10回引いた', check:p => p.total >= 10 },
+    { id:'fifty', icon:'🏔️', name:'探求者', desc:'50回引いた', check:p => p.total >= 50 },
+    { id:'ssr', icon:'💎', name:'伝説の輝き', desc:'SSRを獲得', check:p => p.rarityCount.SSR >= 1 },
+    { id:'allRare', icon:'🌈', name:'七色の星', desc:'全レア度を獲得', check:p => p.rarityCount.C>0 && p.rarityCount.UC>0 && p.rarityCount.R>0 && p.rarityCount.SR>0 && p.rarityCount.SSR>0 },
+    { id:'streak5', icon:'🔥', name:'熱中', desc:'5連続で引いた', check:p => p.maxStreak >= 5 },
+    { id:'streak10', icon:'⚡', name:'止まらない探求', desc:'10連続で引いた', check:p => p.maxStreak >= 10 },
+    { id:'complete', icon:'👑', name:'コンプリート', desc:'全ての問いを獲得', check:(p,total) => total>0 && Object.keys(p.collected).length >= total }
+  ];
+
+  // ===== レア度判定 =====
+  function rollRarity() {
+    const r = Math.random() * 100;
+    let multiplier = player.luckyTime && Date.now() < player.luckyEnd ? 2 : 1;
+    
+    // SSR: 2% (luckyで4%)
+    if (r < 2 * multiplier) return 'SSR';
+    // SR: 8% (luckyで16%)
+    if (r < 2 * multiplier + 8 * multiplier) return 'SR';
+    // R: 20%
+    if (r < 30) return 'R';
+    // UC: 30%
+    if (r < 60) return 'UC';
+    // C: 残り
+    return 'C';
+  }
+
+  const RARITY_NAMES = { C:'COMMON', UC:'UNCOMMON', R:'RARE', SR:'SUPER RARE', SSR:'★ SSR ★' };
+  const RARITY_POINTS = { C:1, UC:3, R:10, SR:30, SSR:100 };
+
+  // ===== UI更新 =====
+  function updateHUD() {
+    const questions = getQuestions();
+    const total = questions.length;
+    const collected = Object.keys(player.collected).filter(q => questions.includes(q)).length;
+    document.getElementById('hudCodex').textContent = `${collected}/${total}`;
+    document.getElementById('hudLevel').textContent = player.level;
+    const unlockedAch = ACHIEVEMENTS.filter(a => player.achievements[a.id]).length;
+    document.getElementById('hudAchieve').textContent = `${unlockedAch}/${ACHIEVEMENTS.length}`;
+    
+    // ゲージ
+    const gaugeStars = document.getElementById('gaugeStars');
+    gaugeStars.innerHTML = '';
+    for (let i = 0; i < 12; i++) {
+      const s = document.createElement('span');
+      s.textContent = i < player.gauge ? '★' : '☆';
+      if (i < player.gauge) s.classList.add('lit');
+      gaugeStars.appendChild(s);
+    }
+    document.getElementById('gaugeCount').textContent = player.gauge;
+  }
+
+  // ===== トースト =====
+  function showToast(msg, duration = 2500) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), duration);
+  }
+
+  // ===== レベルアップ =====
+  function showLevelUp(text) {
+    const n = document.getElementById('levelupNotice');
+    n.innerHTML = text;
+    n.classList.remove('show');
+    void n.offsetWidth;
+    n.classList.add('show');
+    playLevelUpSound();
+  }
+
+  // ===== 効果音 =====
+  let audioCtx;
+  function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  function playChime(freq = 1318.51) {
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.value = freq; o.type = 'sine';
+    g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+    o.start(); o.stop(audioCtx.currentTime + 0.4);
+  }
+  function playStarFall() {
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.setValueAtTime(2000, audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.6);
+    o.type = 'sine';
+    g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+    o.start(); o.stop(audioCtx.currentTime + 0.6);
+  }
+  function playFanfare(rarity) {
+    if (!audioCtx) return;
+    const noteMap = {
+      C: [523.25, 659.25],
+      UC: [523.25, 659.25, 783.99],
+      R: [523.25, 659.25, 783.99, 1046.50],
+      SR: [523.25, 659.25, 783.99, 1046.50, 1318.51],
+      SSR: [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98, 2093.00]
+    };
+    const notes = noteMap[rarity] || noteMap.C;
+    notes.forEach((freq, i) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+      o.connect(filter); filter.connect(g); g.connect(audioCtx.destination);
+      filter.type = 'lowpass'; filter.frequency.value = 3000;
+      o.frequency.value = freq; o.type = 'triangle';
+      const t = audioCtx.currentTime + i * 0.1;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.18, t + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+      o.start(t); o.stop(t + 0.8);
+    });
+  }
+  function playLevelUpSound() {
+    if (!audioCtx) return;
+    [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.frequency.value = f; o.type = 'sine';
+      const t = audioCtx.currentTime + i * 0.08;
+      g.gain.setValueAtTime(0.2, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      o.start(t); o.stop(t + 0.5);
+    });
+  }
+
+  // ===== タップ操作 =====
+  const device = document.getElementById('device');
+  const aura = document.getElementById('aura');
+  const windowText = document.getElementById('windowText');
+  const starDrop = document.getElementById('starDrop');
+  const modal = document.getElementById('modal');
+  const questionText = document.getElementById('questionText');
+  const modalContent = document.getElementById('modalContent');
+  const rarityBadge = document.getElementById('rarityBadge');
+  const newBadge = document.getElementById('newBadge');
+  const rewardInfo = document.getElementById('rewardInfo');
+  const modalCrown = document.getElementById('modalCrown');
+
+  let isSpinning = false;
+  let tapCount = 0;
+
+  function activateOrb(e) {
+    if (isSpinning) return;
+    initAudio();
+
+    // 問いがない場合は警告
+    const questions = getQuestions();
+    if (questions.length === 0) {
+      showToast('⚠️ まだ問いが登録されていません', 3000);
+      return;
+    }
+
+    tapCount++;
+    playChime();
+    createRipple(e);
+
+    if (tapCount === 1) {
+      orb.classList.add('glowing');
+      windowText.innerHTML = '✦ 星 が 共 鳴 し て い る ✦';
+    } else if (tapCount === 2) {
+      windowText.innerHTML = '✦ も う 少 し … ✦';
+    } else if (tapCount >= 3) {
+      tapCount = 0;
+      triggerGacha();
+    }
+    e.preventDefault();
+  }
+
+  function createRipple(e) {
+    const rect = orb.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    const ripple = document.createElement('div');
+    ripple.style.cssText = `
+      position:absolute; left:${x}px; top:${y}px;
+      width:10px; height:10px; border-radius:50%;
+      background:radial-gradient(circle, rgba(255,215,0,0.8), transparent);
+      transform:translate(-50%,-50%); pointer-events:none; z-index:10;
+    `;
+    orb.appendChild(ripple);
+    ripple.animate([
+      { width:'10px', height:'10px', opacity:1 },
+      { width:'250px', height:'250px', opacity:0 }
+    ], { duration:800, easing:'ease-out' });
+    setTimeout(()=>ripple.remove(), 800);
+  }
+
+  // ===== ガチャ実行 =====
+  function triggerGacha() {
+    if (isSpinning) return;
+    isSpinning = true;
+
+    const questions = getQuestions();
+    if (questions.length === 0) {
+      isSpinning = false;
+      return;
+    }
+
+    // ラッキータイム判定（3%確率で発動、未発動時のみ）
+    const luckyActive = player.luckyTime && Date.now() < player.luckyEnd;
+    if (!luckyActive && Math.random() < 0.03) {
+      player.luckyTime = true;
+      player.luckyEnd = Date.now() + 60000; // 1分間
+      document.getElementById('luckyBanner').classList.add('show');
+      document.getElementById('universe').classList.add('lucky');
+      setTimeout(()=>{
+        document.getElementById('luckyBanner').classList.remove('show');
+        document.getElementById('universe').classList.remove('lucky');
+      }, 3000);
+      setTimeout(()=>{
+        if (Date.now() >= player.luckyEnd) {
+          document.getElementById('universe').classList.remove('lucky');
+        }
+      }, 60000);
+    }
+
+    // レア度判定
+    let rarity = rollRarity();
+    
+    // デイリーボーナス: 1日初回はSR以上確定
+    const today = new Date().toDateString();
+    if (player.lastDaily !== today) {
+      player.lastDaily = today;
+      if (rarity === 'C' || rarity === 'UC' || rarity === 'R') rarity = 'SR';
+      showToast('🌙 デイリーボーナス: SR以上確定！', 2000);
+    }
+
+    // 問い選定（同レア優先、なければランダム）
+    const picked = questions[Math.floor(Math.random() * questions.length)];
+
+    // 演出
+    device.classList.add('shaking');
+    orb.classList.add('spinning', 'glowing');
+    aura.classList.add('intense');
+    if (rarity === 'SSR') aura.classList.add('ssr');
+    
+    windowText.innerHTML = rarity === 'SSR' 
+      ? '💎 伝説の星が降臨…！ 💎'
+      : '✨ 星が集まっている ✨';
+
+    let chimeInterval = setInterval(()=>playChime(800 + Math.random()*400), 200);
+
+    const buildupTime = rarity === 'SSR' ? 2800 : (rarity === 'SR' ? 2200 : 1800);
+
+    setTimeout(() => {
+      clearInterval(chimeInterval);
+      device.classList.remove('shaking');
+      orb.classList.remove('spinning');
+      windowText.innerHTML = '';
+
+      const starColors = {
+        C: '#aaaaaa',
+        UC: '#4ec9b0',
+        R: '#4a90e2',
+        SR: '#b06ed8',
+        SSR: '#ffd700'
+      };
+      starDrop.style.color = starColors[rarity];
+      starDrop.classList.remove('drop');
+      void starDrop.offsetWidth;
+      starDrop.classList.add('drop');
+      setTimeout(playStarFall, 200);
+
+      setTimeout(() => {
+        playFanfare(rarity);
+        showStarBurst(rarity);
+        finalizeGacha(picked, rarity);
+      }, 1700);
+    }, buildupTime);
+  }
+
+  function finalizeGacha(question, rarity) {
+    // データ更新
+    player.total++;
+    player.rarityCount[rarity]++;
+    const points = RARITY_POINTS[rarity];
+    player.points += points;
+    player.gauge++;
+    player.currentStreak++;
+    if (player.currentStreak > player.maxStreak) player.maxStreak = player.currentStreak;
+
+    // NEW判定
+    const isNew = !player.collected[question];
+    if (isNew) {
+      player.collected[question] = { rarity, count: 1, firstAt: Date.now() };
+    } else {
+      player.collected[question].count++;
+      // 獲得済の最高レア度を保存
+      const order = ['C','UC','R','SR','SSR'];
+      if (order.indexOf(rarity) > order.indexOf(player.collected[question].rarity)) {
+        player.collected[question].rarity = rarity;
+      }
+    }
+
+    // 星座完成
+    let levelUp = false;
+    if (player.gauge >= 12) {
+      player.gauge = 0;
+      player.level++;
+      levelUp = true;
+    }
+
+    // 実績チェック
+    const totalQ = getQuestions().length;
+    const newAchievements = [];
+    ACHIEVEMENTS.forEach(a => {
+      if (!player.achievements[a.id] && a.check(player, totalQ)) {
+        player.achievements[a.id] = Date.now();
+        newAchievements.push(a);
+      }
+    });
+
+    savePlayer(player);
+    updateHUD();
+
+    // モーダル表示
+    rarityBadge.className = 'rarity-badge rarity-' + rarity;
+    rarityBadge.textContent = RARITY_NAMES[rarity];
+    questionText.textContent = question;
+    newBadge.classList.toggle('show', isNew);
+    modalContent.classList.toggle('ssr-modal', rarity === 'SSR');
+    modalCrown.textContent = rarity === 'SSR' ? '👑' : (rarity === 'SR' ? '💜' : '✨');
+
+    let info = `<div class="reward-item">✨ きらめき +${points}pt</div>`;
+    info += `<div class="reward-item">🔥 連続: ${player.currentStreak}</div>`;
+    if (player.luckyTime && Date.now() < player.luckyEnd) {
+      info += `<div class="reward-item">⭐ ラッキータイム中！</div>`;
+    }
+    rewardInfo.innerHTML = info;
+
+    modal.classList.add('show');
+
+    // 後処理
+    setTimeout(() => {
+      starDrop.classList.remove('drop');
+      windowText.innerHTML = '✦ 球 に 触 れ て 願 い を ✦';
+      orb.classList.remove('glowing');
+      aura.classList.remove('intense', 'ssr');
+      isSpinning = false;
+    }, 600);
+
+    // レベルアップ・実績通知（モーダルが閉じた後）
+    if (levelUp) {
+      setTimeout(()=>showLevelUp(`🌟 LEVEL UP! 🌟<br>Lv.${player.level}`), 800);
+    }
+    newAchievements.forEach((a, i) => {
+      setTimeout(()=>showToast(`🏆 実績解除: ${a.name}`, 3000), 1200 + i*1500);
+    });
+
+    // 連続ボーナス通知
+    if ([3,5,10,15,20,30].includes(player.currentStreak)) {
+      setTimeout(()=>showToast(`🔥 ${player.currentStreak}連続！`, 2000), 600);
+    }
+  }
+
+  function showStarBurst(rarity) {
+    const symbols = ['✦','✧','⭐','✨','🌟','💫','★','☆','✩','🌠'];
+    const count = rarity === 'SSR' ? 80 : (rarity === 'SR' ? 60 : 40);
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+      const colors = rarity === 'SSR' 
+        ? ['#ffd700','#fff5b8','#ff9ed8','#fff','#ffec99']
+        : ['#ffd700','#ff9ed8','#b8a8ff','#a8e6f5','#fff5b8','#fff'];
+      s.style.color = colors[Math.floor(Math.random()*colors.length)];
+      s.style.left = '50vw'; s.style.top = '50vh';
+      s.style.textShadow = '0 0 10px currentColor, 0 0 20px currentColor';
+      document.body.appendChild(s);
+      const angle = (i / count) * Math.PI * 2 + Math.random()*0.3;
+      const dist = 200 + Math.random()*500;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      s.animate([
+        { transform:'translate(0,0) scale(0) rotate(0)', opacity:1 },
+        { transform:`translate(${dx}px,${dy}px) scale(${1 + Math.random()}) rotate(${Math.random()*720}deg)`, opacity:0 }
+      ], { duration:1500 + Math.random()*800, easing:'cubic-bezier(0.2, 0.8, 0.4, 1)' });
+      setTimeout(()=>s.remove(), 2300);
+    }
+  }
+
+  function spinAgain() { 
+    modal.classList.remove('show');
+    setTimeout(()=>{
+      windowText.innerHTML = '✦ ま た 星 が 待 っ て い る ✦';
+      setTimeout(()=>{ windowText.innerHTML = '✦ 球 に 触 れ て 願 い を ✦'; }, 1500);
+    }, 300);
+  }
+  function backToTitle() { 
+    modal.classList.remove('show');
+    player.currentStreak = 0; // タイトルに戻ったら連続リセット
+    savePlayer(player);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  // ===== パネル =====
+  function openPanel(tab) {
+    document.getElementById('panelModal').classList.add('show');
+    document.getElementById('panelClose').style.display = 'block';
+    switchTab(tab);
+  }
+  function closePanel() {
+    document.getElementById('panelModal').classList.remove('show');
+    document.getElementById('panelClose').style.display = 'none';
+  }
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    ['codex','stats','achieve'].forEach(t => {
+      document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = (t === name) ? 'block' : 'none';
+    });
+    if (name === 'codex') renderCodex();
+    if (name === 'stats') renderStats();
+    if (name === 'achieve') renderAchievements();
+  }
+
+  function renderCodex() {
+    const list = document.getElementById('codexList');
+    const questions = getQuestions();
+    if (questions.length === 0) {
+      list.innerHTML = '<div class="empty-msg">問いがまだ登録されていません</div>';
+      return;
+    }
+    const order = {SSR:0, SR:1, R:2, UC:3, C:4};
+    const sorted = questions.slice().sort((a, b) => {
+      const ca = player.collected[a], cb = player.collected[b];
+      if (ca && !cb) return -1;
+      if (!ca && cb) return 1;
+      if (ca && cb) return order[ca.rarity] - order[cb.rarity];
+      return 0;
+    });
+    list.innerHTML = sorted.map(q => {
+      const c = player.collected[q];
+      if (c) {
+        return `<div class="codex-item ${c.rarity}">
+          <span class="rarity-badge rarity-${c.rarity} codex-rare">${RARITY_NAMES[c.rarity]}</span>
+          <span class="codex-text">${q.replace(/</g,'&lt;')}</span>
+          <span style="color:#888; font-size:0.8em;">×${c.count}</span>
+        </div>`;
+      } else {
+        return `<div class="codex-item locked">
+          <span class="rarity-badge codex-rare" style="background:#444;">???</span>
+          <span class="codex-text">？？？？？？？？？？</span>
+        </div>`;
+      }
+    }).join('');
+  }
+
+  function renderStats() {
+    const questions = getQuestions();
+    const collected = Object.keys(player.collected).filter(q => questions.includes(q)).length;
+    const rate = questions.length > 0 ? Math.round(collected / questions.length * 100) : 0;
+    document.getElementById('statTotal').textContent = player.total;
+    document.getElementById('statLevel').textContent = player.level;
+    document.getElementById('statPoints').textContent = player.points;
+    document.getElementById('statRate').textContent = rate + '%';
+    document.getElementById('statSSR').textContent = player.rarityCount.SSR;
+    document.getElementById('statStreak').textContent = player.maxStreak;
+  }
+
+  function renderAchievements() {
+    const list = document.getElementById('achList');
+    const totalQ = getQuestions().length;
+    list.innerHTML = ACHIEVEMENTS.map(a => {
+      const unlocked = !!player.achievements[a.id];
+      return `<div class="achievement ${unlocked ? 'unlocked' : 'locked'}">
+        <div class="ach-icon">${unlocked ? a.icon : '🔒'}</div>
+        <div class="ach-info">
+          <div class="ach-name">${a.name}</div>
+          <div class="ach-desc">${a.desc}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function resetData() {
+    if (!confirm('全てのプレイデータをリセットします。本当によろしいですか？')) return;
+    localStorage.removeItem(PLAYER_KEY);
+    player = getPlayer();
+    updateHUD();
+    closePanel();
+    showToast('🌌 データをリセットしました');
+  }
+
+  // ===== 初期化 =====
+  updateHUD();
+  
+  // ラッキータイム継続チェック
+  if (player.luckyTime && Date.now() < player.luckyEnd) {
+    document.getElementById('universe').classList.add('lucky');
+    setTimeout(()=>{
+      document.getElementById('universe').classList.remove('lucky');
+    }, player.luckyEnd - Date.now());
+  } else if (player.luckyTime) {
+    player.luckyTime = false;
+    savePlayer(player);
+  }
+
+  orb.addEventListener('click', activateOrb);
+  orb.addEventListener('touchstart', activateOrb, {passive:false});
+</script>
+</body>
+</html>
