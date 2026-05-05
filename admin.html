@@ -4,122 +4,72 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>🔐 問いガチャ｜管理画面</title>
+<title>問いガチャ｜管理画面</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    font-family:'Hiragino Maru Gothic ProN','Quicksand',sans-serif;
-    background: linear-gradient(135deg, #ffd1dc 0%, #e0f7ff 100%);
-    color:#4a3540; min-height:100vh; padding:20px;
+    font-family:'Hiragino Sans','Yu Gothic',sans-serif;
+    background:#2c3e50; color:#fff; min-height:100vh; padding:20px;
   }
   .container { max-width:600px; margin:0 auto; }
-  h1 {
-    text-align:center; margin-bottom:25px; font-size:1.9em; color:#ff6b9d;
-    text-shadow: 2px 2px 0 #fff;
-  }
+  h1 { text-align:center; margin-bottom:30px; font-size:1.8em; }
 
   .login-box, .admin-box {
-    background:#fff; padding:35px 28px; border-radius:25px;
-    box-shadow:0 15px 40px rgba(255,107,157,0.2);
-    border: 3px dashed #ffb8d4;
+    background:#34495e; padding:30px; border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
   }
   .admin-box { display:none; }
 
-  label { display:block; margin-bottom:8px; font-weight:bold; color:#a86b8c; }
   input[type=password], input[type=text] {
-    width:100%; padding:14px 18px;
-    border:2px solid #ffd1dc; border-radius:15px;
+    width:100%; padding:12px; border:none; border-radius:8px;
     font-size:1em; margin-bottom:15px;
-    font-family:inherit;
-    background:#fff5f9; color:#4a3540;
-    transition:border-color 0.2s;
   }
-  input:focus { outline:none; border-color:#ff6b9d; }
-
   button {
-    width:100%; padding:14px; border:none; border-radius:25px;
-    background:linear-gradient(135deg, #ff8fb1, #ff5188);
-    color:#fff; font-size:1em; font-weight:bold;
-    cursor:pointer; transition:all 0.2s;
-    font-family:inherit;
-    box-shadow:0 4px 0 #c93063;
+    width:100%; padding:12px; border:none; border-radius:8px;
+    background:#e74c3c; color:#fff; font-size:1em; font-weight:bold;
+    cursor:pointer; transition:background 0.2s;
   }
-  button:hover { transform:translateY(-2px); box-shadow:0 6px 0 #c93063; }
-  button:active { transform:translateY(2px); box-shadow:0 2px 0 #c93063; }
-  button.secondary {
-    background:#fff; color:#ff6b9d; border:2px solid #ffb8d4;
-    box-shadow:0 4px 0 #ffb8d4;
-  }
-  button.secondary:hover { box-shadow:0 6px 0 #ffb8d4; }
+  button:hover { background:#c0392b; }
+  button.secondary { background:#7f8c8d; }
+  button.secondary:hover { background:#5d6d6e; }
 
-  .question-list { margin-top:25px; }
+  .question-list { margin-top:20px; }
   .question-item {
-    background:linear-gradient(135deg, #fff5f9, #ffe9f0);
-    padding:14px 18px; margin-bottom:10px;
-    border-radius:15px;
-    display:flex; justify-content:space-between; align-items:center;
-    gap:12px;
-    border:2px solid #ffd1dc;
-    animation: slideIn 0.3s ease-out;
+    background:#2c3e50; padding:12px 15px; margin-bottom:8px;
+    border-radius:8px; display:flex; justify-content:space-between; align-items:center;
+    gap:10px;
   }
-  @keyframes slideIn {
-    from { opacity:0; transform:translateX(-10px); }
-    to { opacity:1; transform:translateX(0); }
-  }
-  .question-item span { flex:1; word-break:break-word; color:#4a3540; }
+  .question-item span { flex:1; word-break:break-word; }
   .question-item button {
-    width:auto; padding:8px 14px; font-size:0.85em;
-    background:linear-gradient(135deg, #aaa, #888);
-    box-shadow:0 3px 0 #555;
+    width:auto; padding:6px 12px; font-size:0.85em;
+    background:#95a5a6;
   }
-  .question-item button:hover { box-shadow:0 5px 0 #555; }
-
-  .info {
-    background:linear-gradient(135deg, #ffe69e, #ffd166);
-    color:#7a5a00; padding:12px 18px; border-radius:15px;
-    margin-bottom:20px; font-size:0.9em; font-weight:bold;
-  }
-  .error {
-    color:#e74c3c; margin-top:12px; text-align:center; font-weight:bold;
-    background:#ffe5e5; padding:8px; border-radius:10px;
-  }
-  .empty {
-    text-align:center; color:#bdaaba; margin-top:20px;
-    font-style:italic; padding:20px;
-  }
-  .count-badge {
-    display:inline-block; background:#ff6b9d; color:#fff;
-    padding:3px 12px; border-radius:15px; font-size:0.85em;
-    margin-left:8px;
-  }
+  .info { background:#16a085; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.9em; }
+  .error { color:#e74c3c; margin-top:10px; text-align:center; font-weight:bold; }
 </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎀 管理画面 🎀</h1>
+    <h1>🔐 問いガチャ 管理画面</h1>
 
     <!-- ログイン -->
     <div class="login-box" id="loginBox">
-      <label>🔐 管理者パスワード</label>
-      <input type="password" id="pwInput" placeholder="パスワードを入力">
-      <button onclick="login()">ログイン ✨</button>
-      <p class="error" id="errMsg" style="display:none;"></p>
+      <p style="margin-bottom:15px;">管理者パスワードを入力してください</p>
+      <input type="password" id="pwInput" placeholder="パスワード">
+      <button onclick="login()">ログイン</button>
+      <p class="error" id="errMsg"></p>
     </div>
 
     <!-- 編集画面 -->
     <div class="admin-box" id="adminBox">
-      <div class="info">💡 追加した問いは公開ガチャに反映されます</div>
+      <div class="info">💡 ここで追加した問いは、公開用ガチャに反映されます</div>
 
-      <label>📝 新しい問いを追加</label>
-      <input type="text" id="newQuestion" placeholder="例: 幸せとは何ですか？">
-      <button onclick="addQuestion()">＋ 追加する</button>
+      <input type="text" id="newQuestion" placeholder="新しい問いを入力（例: 幸せとは何ですか？）">
+      <button onclick="addQuestion()">＋ 問いを追加</button>
 
-      <h3 style="margin-top:25px; color:#ff6b9d;">
-        登録済みの問い<span class="count-badge" id="countBadge">0</span>
-      </h3>
       <div class="question-list" id="questionList"></div>
 
-      <button class="secondary" style="margin-top:25px;" onclick="logout()">ログアウト</button>
+      <button class="secondary" style="margin-top:20px;" onclick="logout()">ログアウト</button>
     </div>
   </div>
 
@@ -129,14 +79,12 @@
 
   function login() {
     const input = document.getElementById('pwInput').value;
-    const err = document.getElementById('errMsg');
     if (input === ADMIN_PASSWORD) {
       document.getElementById('loginBox').style.display='none';
       document.getElementById('adminBox').style.display='block';
       renderList();
     } else {
-      err.textContent='パスワードが違います 💦';
-      err.style.display='block';
+      document.getElementById('errMsg').textContent='パスワードが違います';
     }
   }
 
@@ -144,7 +92,7 @@
     document.getElementById('loginBox').style.display='block';
     document.getElementById('adminBox').style.display='none';
     document.getElementById('pwInput').value='';
-    document.getElementById('errMsg').style.display='none';
+    document.getElementById('errMsg').textContent='';
   }
 
   function getQuestions() {
@@ -167,7 +115,6 @@
   }
 
   function deleteQuestion(idx) {
-    if (!confirm('この問いを削除しますか？')) return;
     const arr = getQuestions();
     arr.splice(idx,1);
     saveQuestions(arr);
@@ -177,9 +124,8 @@
   function renderList() {
     const arr = getQuestions();
     const list = document.getElementById('questionList');
-    document.getElementById('countBadge').textContent = arr.length;
     if (arr.length===0) {
-      list.innerHTML='<p class="empty">まだ問いがありません 🌸<br>上のフォームから追加してね！</p>';
+      list.innerHTML='<p style="text-align:center;color:#bdc3c7;margin-top:15px;">まだ問いがありません</p>';
       return;
     }
     list.innerHTML = arr.map((q,i)=>`
@@ -189,16 +135,6 @@
       </div>
     `).join('');
   }
-
-  // Enterキーで追加
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('pwInput').addEventListener('keypress', e => {
-      if (e.key==='Enter') login();
-    });
-    document.getElementById('newQuestion').addEventListener('keypress', e => {
-      if (e.key==='Enter') addQuestion();
-    });
-  });
 </script>
 </body>
 </html>
