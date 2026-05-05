@@ -4,331 +4,367 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>✨ 問いガチャ - 宇宙の問い ✨</title>
+<title>🌊 問いガチャ - 海底神殿 🐚</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { overflow-x:hidden; }
   body {
     font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-    background: #0a0420;
-    min-height: 100vh; display:flex; justify-content:center; align-items:center;
-    user-select:none; padding:20px 10px;
+    background: #001428;
+    min-height: 100vh; 
+    user-select:none; 
     position:relative; color:#fff;
   }
 
-  /* === 宇宙背景 === */
-  .universe {
+  /* === 海中背景 === */
+  .ocean {
     position:fixed; inset:0; z-index:0;
     background: 
-      radial-gradient(ellipse at 20% 30%, rgba(120,60,200,0.4) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 70%, rgba(60,120,200,0.35) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgba(200,80,180,0.2) 0%, transparent 60%),
-      linear-gradient(180deg, #0a0420 0%, #1a0838 50%, #0a0420 100%);
+      radial-gradient(ellipse at 30% 20%, rgba(100,200,255,0.25) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 80%, rgba(50,150,200,0.2) 0%, transparent 50%),
+      linear-gradient(180deg, 
+        #003a5c 0%, 
+        #002847 30%, 
+        #001a35 60%,
+        #000d20 100%);
   }
-  /* 星々 */
-  .star-bg {
-    position:absolute; width:2px; height:2px;
-    background:#fff; border-radius:50%;
-    box-shadow: 0 0 6px #fff, 0 0 12px rgba(255,255,255,0.5);
-    animation: twinkle var(--dur, 3s) ease-in-out infinite;
+  /* 光線 */
+  .light-ray {
+    position:absolute;
+    width:120px; height:100vh;
+    background: linear-gradient(180deg, 
+      rgba(150,220,255,0.15) 0%, 
+      rgba(150,220,255,0.05) 40%,
+      transparent 80%);
+    transform-origin: top;
+    animation: rayMove 8s ease-in-out infinite;
   }
-  @keyframes twinkle {
-    0%,100% { opacity:0.3; transform:scale(0.8); }
-    50% { opacity:1; transform:scale(1.3); }
+  @keyframes rayMove {
+    0%,100% { transform: rotate(-3deg) translateX(0); opacity:0.6; }
+    50% { transform: rotate(3deg) translateX(20px); opacity:1; }
   }
-  /* 流れ星 */
-  .shooting-star {
-    position:absolute; width:120px; height:1px;
-    background: linear-gradient(90deg, transparent, #fff, transparent);
-    animation: shoot 4s ease-out infinite;
-    opacity:0;
+  /* 泡 */
+  .bubble {
+    position:absolute;
+    background: radial-gradient(circle at 30% 30%, 
+      rgba(255,255,255,0.7), 
+      rgba(150,220,255,0.3) 60%,
+      rgba(100,180,220,0.1));
+    border-radius:50%;
+    border: 1px solid rgba(255,255,255,0.3);
+    bottom:-50px;
+    animation: floatBubble linear infinite;
   }
-  @keyframes shoot {
-    0% { transform: translate(-200px, 0) rotate(20deg); opacity:0; }
-    10% { opacity:1; }
-    100% { transform: translate(100vw, 50vh) rotate(20deg); opacity:0; }
+  @keyframes floatBubble {
+    0% { transform:translateY(0) translateX(0); opacity:0; }
+    10% { opacity:0.8; }
+    50% { transform:translateY(-50vh) translateX(30px); }
+    90% { opacity:0.6; }
+    100% { transform:translateY(-110vh) translateX(-20px); opacity:0; }
+  }
+  /* 魚 */
+  .fish {
+    position:absolute;
+    font-size: 1.5em;
+    opacity: 0.5;
+    animation: swimAcross linear infinite;
+  }
+  @keyframes swimAcross {
+    0% { transform:translateX(-100px) scaleX(1); }
+    49% { transform:translateX(50vw) scaleX(1); }
+    50% { transform:translateX(50vw) scaleX(-1); }
+    100% { transform:translateX(110vw) scaleX(-1); }
+  }
+  /* クラゲ */
+  .jellyfish {
+    position:absolute;
+    font-size:2em;
+    opacity:0.4;
+    animation: jellyDrift 15s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(255,200,255,0.5));
+  }
+  @keyframes jellyDrift {
+    0%,100% { transform:translateY(0) translateX(0); }
+    50% { transform:translateY(-30px) translateX(20px); }
   }
 
   /* === メインコンテンツ === */
   .container { 
     text-align:center; z-index:2; position:relative; 
-    max-width: 480px; width: 100%;
+    max-width: 500px; margin: 0 auto;
+    padding: 30px 15px;
   }
 
-  .crown {
-    font-size:2em; margin-bottom:5px;
-    filter: drop-shadow(0 0 15px rgba(255,215,100,0.8));
-    animation: floatCrown 4s ease-in-out infinite;
-  }
-  @keyframes floatCrown {
-    0%,100% { transform:translateY(0); }
-    50% { transform:translateY(-8px); }
+  .logo {
+    font-size:1.8em; margin-bottom:5px;
+    filter: drop-shadow(0 0 15px rgba(150,220,255,0.6));
   }
 
   h1 {
-    font-size:2.6em; margin-bottom:8px;
-    background: linear-gradient(135deg, #fff5b8 0%, #ffd700 30%, #ff9ed8 60%, #b8a8ff 100%);
+    font-size:2.4em; margin-bottom:8px;
+    background: linear-gradient(135deg, #c8f0ff 0%, #80d8ff 40%, #ffb8e0 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing:0.15em;
     font-weight: 300;
-    text-shadow: 0 0 40px rgba(255,200,255,0.3);
-    filter: drop-shadow(0 0 20px rgba(255,180,220,0.4));
+    filter: drop-shadow(0 0 20px rgba(150,220,255,0.4));
   }
-  h1 span { font-weight: 600; }
+  h1 span { font-weight: 700; }
 
   .subtitle { 
-    color:#d8c8ff; margin-bottom:35px; font-size:0.9em;
+    color:#a8d8e8; margin-bottom:20px; font-size:0.85em;
     letter-spacing:0.3em;
-    opacity:0.8;
+    opacity:0.85;
   }
-  .subtitle::before, .subtitle::after { content:'✦ '; color:#ffd700; }
-  .subtitle::after { content:' ✦'; }
+  .subtitle::before, .subtitle::after { content:'～'; margin: 0 10px; color:#80d8ff; }
 
-  /* === 装置：星のオルゴール === */
-  .device-wrapper {
+  /* === 統計バー === */
+  .stats-bar {
+    display:flex; justify-content:center; gap:15px;
+    margin-bottom:25px;
+    flex-wrap:wrap;
+  }
+  .stat-item {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(150,220,255,0.3);
+    border-radius:20px;
+    padding:8px 16px;
+    font-size:0.8em;
+    color:#c8f0ff;
+    letter-spacing:0.05em;
+  }
+  .stat-item strong { 
+    color:#ffd700; 
+    margin-right:5px;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+  }
+
+  /* === 神殿装置 === */
+  .temple {
     position:relative;
     width:320px; margin:0 auto;
-    perspective: 1000px;
   }
 
-  /* オーラ */
-  .aura {
-    position:absolute; inset:-40px;
+  /* 周囲の光輪 */
+  .halo {
+    position:absolute;
+    inset:-50px;
     background: radial-gradient(circle, 
-      rgba(255,200,255,0.3) 0%, 
-      rgba(180,150,255,0.15) 30%, 
+      rgba(150,220,255,0.3) 0%, 
+      rgba(100,180,220,0.15) 30%, 
       transparent 70%);
     border-radius:50%;
-    animation: pulseAura 3s ease-in-out infinite;
+    animation: haloPulse 3s ease-in-out infinite;
     pointer-events:none;
   }
-  @keyframes pulseAura {
+  @keyframes haloPulse {
     0%,100% { transform:scale(1); opacity:0.6; }
     50% { transform:scale(1.15); opacity:1; }
   }
-  .aura.intense { 
-    animation: pulseAura 0.4s ease-in-out infinite;
-    background: radial-gradient(circle, 
-      rgba(255,180,220,0.6) 0%, 
-      rgba(200,150,255,0.4) 30%, 
-      transparent 70%);
-  }
 
-  /* 上部：水晶球（星が舞う球体） */
-  .orb {
-    width:280px; height:280px; margin:0 auto;
-    position:relative;
-    border-radius:50%;
-    background: 
-      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.4) 0%, transparent 30%),
-      radial-gradient(circle at 70% 70%, rgba(150,100,200,0.4) 0%, transparent 50%),
-      radial-gradient(circle at 50% 50%, rgba(40,20,80,0.95) 0%, rgba(20,10,50,0.95) 60%, rgba(10,5,30,0.98) 100%);
-    box-shadow: 
-      inset -20px -30px 60px rgba(0,0,0,0.6),
-      inset 20px 20px 40px rgba(255,200,255,0.15),
-      0 0 60px rgba(180,120,255,0.4),
-      0 0 120px rgba(150,100,255,0.2);
-    overflow:hidden;
-    cursor:grab;
-    transition: box-shadow 0.5s;
-  }
-  .orb:active { cursor:grabbing; }
-  .orb.glowing {
-    box-shadow: 
-      inset -20px -30px 60px rgba(0,0,0,0.4),
-      inset 20px 20px 40px rgba(255,200,255,0.3),
-      0 0 100px rgba(255,180,220,0.8),
-      0 0 200px rgba(200,150,255,0.5);
-  }
-
-  /* 球の表面ハイライト */
-  .orb::before {
-    content:''; position:absolute;
-    top:15px; left:40px; width:80px; height:60px;
-    background: radial-gradient(ellipse, rgba(255,255,255,0.5), transparent 70%);
-    border-radius:50%;
-    filter: blur(3px);
+  /* 神殿の柱 */
+  .pillars {
+    display:flex; justify-content:space-between;
+    position:absolute;
+    top:30px; left:0; right:0;
     pointer-events:none;
-    z-index:5;
+    z-index:1;
   }
-
-  /* 球体内部の星々 */
-  .inner-star {
-    position:absolute;
-    width:4px; height:4px;
-    background:#fff;
-    border-radius:50%;
-    box-shadow: 0 0 8px #fff, 0 0 16px currentColor;
-    animation: orbitStar var(--dur, 8s) linear infinite;
-  }
-  .inner-star.s1 { color:#ffd700; }
-  .inner-star.s2 { color:#ff9ed8; }
-  .inner-star.s3 { color:#b8a8ff; }
-  .inner-star.s4 { color:#a8e6f5; }
-  .inner-star.s5 { color:#fff5b8; }
-  @keyframes orbitStar {
-    0% { transform: rotate(0) translateX(var(--r, 80px)) rotate(0); }
-    100% { transform: rotate(360deg) translateX(var(--r, 80px)) rotate(-360deg); }
-  }
-  .orb.spinning .inner-star { animation-duration: 0.8s; }
-
-  /* 球の中心の輝き */
-  .core {
-    position:absolute; top:50%; left:50%;
-    width:30px; height:30px;
-    background: radial-gradient(circle, #fff 0%, #ffd700 30%, transparent 70%);
-    border-radius:50%;
-    transform: translate(-50%,-50%);
-    filter: blur(2px);
-    animation: corePulse 2s ease-in-out infinite;
-  }
-  @keyframes corePulse {
-    0%,100% { opacity:0.6; transform: translate(-50%,-50%) scale(1); }
-    50% { opacity:1; transform: translate(-50%,-50%) scale(1.4); }
-  }
-
-  /* 中央：装飾リング */
-  .ring-section {
-    position:relative;
-    width:300px; margin:-30px auto 0;
-    z-index:2;
-  }
-  .ornate-ring {
-    width:100%; height:50px;
-    background: 
-      linear-gradient(180deg, 
-        #ffd700 0%, 
-        #b8860b 30%, 
-        #8b6508 50%,
-        #b8860b 70%,
-        #ffd700 100%);
-    border-radius: 8px;
-    position:relative;
+  .pillar {
+    width:35px; height:280px;
+    background: linear-gradient(90deg, 
+      #4a6580 0%, 
+      #6a8aa5 40%,
+      #8eaec8 50%,
+      #6a8aa5 60%,
+      #4a6580 100%);
+    border-radius:5px 5px 0 0;
     box-shadow: 
-      inset 0 2px 4px rgba(255,255,255,0.6),
-      inset 0 -3px 6px rgba(0,0,0,0.4),
-      0 5px 20px rgba(255,180,100,0.4);
-  }
-  /* 装飾の星 */
-  .ring-stars {
-    position:absolute; inset:0;
-    display:flex; justify-content:space-around; align-items:center;
-    padding: 0 20px;
-  }
-  .ring-stars span {
-    color: #4a2800;
-    font-size: 1.1em;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
-  }
-
-  /* 下部：木製スタンド＋表示窓 */
-  .stand {
-    width:300px; margin:0 auto;
-    background: 
-      repeating-linear-gradient(90deg, 
-        transparent 0px, 
-        rgba(60, 30, 10, 0.4) 1px, 
-        transparent 3px,
-        transparent 15px),
-      linear-gradient(180deg, 
-        #4a2818 0%, 
-        #2d1808 50%,
-        #1a0d04 100%);
-    padding: 25px 20px 30px;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 
-      inset 0 3px 6px rgba(255,180,120,0.15),
-      inset 0 -8px 20px rgba(0,0,0,0.6),
-      0 15px 40px rgba(0,0,0,0.6);
+      inset 0 -5px 10px rgba(0,0,0,0.4),
+      0 0 15px rgba(150,200,255,0.3);
     position:relative;
   }
-  /* スタンドの金縁 */
-  .stand::before {
+  .pillar::before {
     content:''; position:absolute;
-    top:0; left:10px; right:10px;
-    height:3px;
-    background: linear-gradient(90deg, transparent, #ffd700 20%, #ffd700 80%, transparent);
-    border-radius:2px;
+    top:-10px; left:-8px; right:-8px;
+    height:15px;
+    background: linear-gradient(180deg, #aacce5, #6a8aa5);
+    border-radius:3px;
+  }
+  .pillar::after {
+    content:''; position:absolute;
+    bottom:0; left:-8px; right:-8px;
+    height:15px;
+    background: linear-gradient(180deg, #6a8aa5, #4a6580);
+    border-radius:3px;
   }
 
-  /* 表示窓 */
-  .window-frame {
-    background: linear-gradient(135deg, #ffd700, #b8860b);
-    padding:4px;
-    border-radius:10px;
-    box-shadow: 
-      inset 0 2px 3px rgba(255,255,255,0.5),
-      0 3px 8px rgba(0,0,0,0.5);
-  }
-  .window {
-    width:100%; height:90px;
-    background: 
-      radial-gradient(ellipse at center, rgba(80,40,150,0.4) 0%, rgba(20,10,50,0.95) 70%);
-    border-radius:8px;
-    display:flex; align-items:center; justify-content:center;
-    overflow:hidden; position:relative;
-    box-shadow: inset 0 5px 15px rgba(0,0,0,0.8);
-  }
-  .window-text {
-    color:#ffd700; font-size:1em; font-weight:bold;
-    text-align:center; padding:5px;
-    text-shadow: 0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,215,0,0.4);
-    letter-spacing:0.1em;
+  /* 中央の貝殻（メインオブジェクト） */
+  .shell-area {
+    width:100%; height:340px;
+    position:relative;
+    display:flex; justify-content:center; align-items:center;
     z-index:2;
   }
 
-  /* 落ちてくる星 */
-  .star-drop {
+  .shell {
+    width:240px; height:240px;
+    position:relative;
+    cursor:pointer;
+    transition: transform 0.3s;
+  }
+  .shell:active { transform:scale(0.97); }
+
+  /* 貝殻の上半分 */
+  .shell-top, .shell-bottom {
     position:absolute;
-    width:50px; height:50px;
-    top:-60px; left:50%;
-    transform:translateX(-50%);
-    opacity:0;
-    z-index:3;
+    width:100%; height:100%;
+    top:0; left:0;
+    transition: transform 0.8s cubic-bezier(0.5, 0, 0.5, 1);
   }
-  .star-drop svg { width:100%; height:100%; filter: drop-shadow(0 0 12px currentColor); }
-  .star-drop.drop {
-    animation: starFall 1.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  .shell-top svg, .shell-bottom svg {
+    width:100%; height:100%;
+    filter: drop-shadow(0 0 20px rgba(255,200,220,0.5));
   }
-  @keyframes starFall {
-    0% { top:-60px; opacity:0; transform:translateX(-50%) rotate(0) scale(0.5); }
-    15% { opacity:1; }
-    50% { top:20px; transform:translateX(-50%) rotate(360deg) scale(1.2); }
-    75% { top:45px; transform:translateX(-50%) rotate(540deg) scale(1); }
-    85% { top:35px; transform:translateX(-50%) rotate(620deg) scale(1.1); }
-    100% { top:40px; opacity:1; transform:translateX(-50%) rotate(720deg) scale(1); }
+  /* 開く演出 */
+  .shell.opening .shell-top {
+    transform: rotateX(-160deg) translateY(-30px);
+    transform-origin: bottom center;
+  }
+  .shell.opening .shell-bottom {
+    transform: translateY(20px);
   }
 
-  /* 操作ヒント */
-  .tap-hint {
-    margin-top:25px;
-    color: #ffd8f0;
-    font-size:1em;
-    letter-spacing:0.2em;
+  /* 真珠（問い） */
+  .pearl {
+    position:absolute;
+    top:50%; left:50%;
+    transform: translate(-50%,-50%) scale(0);
+    width:100px; height:100px;
+    border-radius:50%;
+    background: 
+      radial-gradient(circle at 30% 30%, 
+        #fff 0%, 
+        #ffe8f5 20%,
+        #ffd0e8 40%,
+        #ffb8d8 60%,
+        #ff9ec8 80%,
+        #d878a8 100%);
+    box-shadow: 
+      inset -10px -10px 25px rgba(180,80,140,0.3),
+      inset 10px 10px 25px rgba(255,255,255,0.5),
+      0 0 40px rgba(255,180,220,0.8),
+      0 0 80px rgba(255,150,200,0.5);
+    z-index:5;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .tap-hint .pulse {
-    display:inline-block;
+  .pearl::before {
+    content:''; position:absolute;
+    top:15%; left:25%;
+    width:25px; height:18px;
+    background: rgba(255,255,255,0.8);
+    border-radius:50%;
+    filter: blur(2px);
+  }
+  .shell.opening .pearl {
+    transform: translate(-50%,-50%) scale(1);
+    animation: pearlFloat 2s ease-in-out infinite;
+  }
+  @keyframes pearlFloat {
+    0%,100% { transform: translate(-50%,-50%) scale(1) translateY(0); }
+    50% { transform: translate(-50%,-50%) scale(1.05) translateY(-5px); }
+  }
+
+  /* 貝殻のホバーヒント */
+  .shell-hint {
+    position:absolute;
+    bottom:-10px; left:50%;
+    transform:translateX(-50%);
+    color:#ffd0e8;
+    font-size:0.85em;
+    letter-spacing:0.2em;
+    white-space:nowrap;
     animation: hintPulse 1.5s ease-in-out infinite;
   }
   @keyframes hintPulse {
-    0%,100% { opacity:0.5; transform:scale(1); }
-    50% { opacity:1; transform:scale(1.1); }
+    0%,100% { opacity:0.5; }
+    50% { opacity:1; }
+  }
+  .shell.opening + .shell-hint { display:none; }
+
+  /* 神殿の基壇 */
+  .pedestal {
+    width:340px; margin:-20px auto 0;
+    height:50px;
+    background: 
+      linear-gradient(180deg, 
+        #5a7590 0%, 
+        #3a5570 50%,
+        #2a3850 100%);
+    border-radius: 8px;
+    box-shadow: 
+      inset 0 3px 5px rgba(255,255,255,0.2),
+      inset 0 -5px 10px rgba(0,0,0,0.5),
+      0 10px 30px rgba(0,0,0,0.6),
+      0 0 40px rgba(100,180,220,0.3);
+    position:relative;
+    z-index:0;
+  }
+  .pedestal::before {
+    content:''; position:absolute;
+    top:8px; left:0; right:0;
+    height:2px;
+    background: linear-gradient(90deg, transparent, #ffd700 30%, #ffd700 70%, transparent);
+    box-shadow: 0 0 10px rgba(255,215,0,0.6);
+  }
+  /* 古代文字風の装飾 */
+  .runes {
+    position:absolute;
+    top:18px; left:0; right:0;
+    text-align:center;
+    color:#ffd700;
+    font-size:1.1em;
+    letter-spacing:0.4em;
+    text-shadow: 0 0 8px rgba(255,215,0,0.8);
+    opacity:0.8;
   }
 
-  /* 装置全体の振動 */
-  .device-wrapper.shaking { animation: deviceShake 0.1s ease-in-out infinite; }
-  @keyframes deviceShake {
-    0%,100% { transform:translate(0,0) rotate(0); }
-    25% { transform:translate(-3px,-1px) rotate(-0.5deg); }
-    75% { transform:translate(3px,1px) rotate(0.5deg); }
+  /* 神殿の振動 */
+  .temple.shaking { animation: templeShake 0.1s ease-in-out infinite; }
+  @keyframes templeShake {
+    0%,100% { transform:translate(0,0); }
+    25% { transform:translate(-3px,-2px); }
+    75% { transform:translate(3px,2px); }
+  }
+
+  /* === タブメニュー === */
+  .tab-menu {
+    margin-top:30px;
+    display:flex; justify-content:center; gap:10px;
+    flex-wrap:wrap;
+  }
+  .tab-btn {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(150,220,255,0.3);
+    color:#c8f0ff;
+    padding:10px 20px; border-radius:20px;
+    font-family:inherit; font-size:0.85em;
+    cursor:pointer; transition:all 0.3s;
+    letter-spacing:0.1em;
+  }
+  .tab-btn:hover {
+    background: rgba(150,220,255,0.15);
+    border-color: rgba(150,220,255,0.6);
+    transform:translateY(-2px);
   }
 
   /* === モーダル === */
   .modal {
     position:fixed; inset:0;
-    background: radial-gradient(circle at center, rgba(20,10,50,0.85) 0%, rgba(5,2,15,0.95) 100%);
+    background: radial-gradient(circle at center, rgba(0,30,60,0.85), rgba(0,10,25,0.95));
     display:none; justify-content:center; align-items:center; z-index:300;
     padding:20px; backdrop-filter: blur(10px);
   }
@@ -337,31 +373,31 @@
 
   .modal-content {
     background: 
-      radial-gradient(circle at top, rgba(80,40,150,0.3), transparent 60%),
-      linear-gradient(135deg, rgba(30,15,60,0.95) 0%, rgba(15,8,40,0.95) 100%);
-    padding: 50px 30px 35px;
+      radial-gradient(circle at top, rgba(50,100,150,0.4), transparent 60%),
+      linear-gradient(135deg, rgba(20,50,80,0.95), rgba(10,25,50,0.95));
+    padding: 50px 28px 35px;
     border-radius: 25px;
-    max-width: 440px; width:100%;
+    max-width: 460px; width:100%;
     text-align:center;
+    position:relative;
+    animation: emerge 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 
+      0 0 60px rgba(150,220,255,0.5),
+      0 0 120px rgba(255,180,220,0.3),
+      inset 0 0 40px rgba(150,220,255,0.05);
     border: 2px solid transparent;
     background-clip: padding-box;
-    position:relative;
-    animation: scrollIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 
-      0 0 60px rgba(180,120,255,0.5),
-      0 0 120px rgba(255,180,220,0.3),
-      inset 0 0 40px rgba(255,200,255,0.05);
+    max-height: 90vh;
+    overflow-y: auto;
   }
-  @keyframes scrollIn {
-    0% { transform:scale(0.5) rotate(-5deg); opacity:0; filter:blur(10px); }
-    100% { transform:scale(1) rotate(0); opacity:1; filter:blur(0); }
+  @keyframes emerge {
+    0% { transform:translateY(50px) scale(0.8); opacity:0; }
+    100% { transform:translateY(0) scale(1); opacity:1; }
   }
-
-  /* モーダルの金枠 */
   .modal-content::before {
     content:''; position:absolute;
     inset: -2px;
-    background: linear-gradient(135deg, #ffd700, #ff9ed8, #b8a8ff, #ffd700);
+    background: linear-gradient(135deg, #80d8ff, #ffb8e0, #ffd700, #80d8ff);
     border-radius:25px;
     z-index:-1;
     background-size: 300% 300%;
@@ -372,50 +408,86 @@
     50% { background-position: 100% 50%; }
   }
 
-  .modal-crown {
+  .modal-icon {
     position:absolute; top:-30px; left:50%;
     transform:translateX(-50%);
     font-size:3em;
-    filter: drop-shadow(0 0 15px rgba(255,215,0,0.8));
-    animation: crownFloat 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(255,200,220,0.8));
+    animation: iconFloat 2s ease-in-out infinite;
   }
-  @keyframes crownFloat {
+  @keyframes iconFloat {
     0%,100% { transform:translateX(-50%) translateY(0) rotate(-3deg); }
     50% { transform:translateX(-50%) translateY(-6px) rotate(3deg); }
   }
 
+  .question-no {
+    color:#ffd700;
+    font-size:0.8em;
+    letter-spacing:0.2em;
+    margin-bottom:8px;
+    opacity:0.7;
+  }
+
   .question-label {
-    color: #ffd700; 
+    color: #ffb8e0; 
     font-size:0.85em; 
-    margin-bottom: 22px;
+    margin-bottom: 20px;
     letter-spacing:0.4em;
-    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+    text-shadow: 0 0 10px rgba(255,180,220,0.5);
   }
   .question-label::before, .question-label::after { 
-    content:'✦'; 
+    content:'❀'; 
     margin: 0 12px; 
-    color:#ff9ed8;
+    color:#80d8ff;
   }
 
   .question-text {
     font-size:1.4em; 
     color:#fff; 
     line-height:1.8;
-    margin-bottom:30px; 
+    margin-bottom:25px; 
     font-weight:500;
     padding:25px 18px;
     background: 
-      radial-gradient(circle at center, rgba(255,200,255,0.08) 0%, transparent 70%),
+      radial-gradient(circle at center, rgba(255,200,220,0.08) 0%, transparent 70%),
       rgba(255,255,255,0.04);
     border-radius:15px;
-    border: 1px solid rgba(255,215,0,0.3);
-    text-shadow: 0 0 15px rgba(255,200,255,0.3);
+    border: 1px solid rgba(150,220,255,0.3);
+    text-shadow: 0 0 15px rgba(200,240,255,0.3);
     letter-spacing:0.05em;
   }
 
-  .btn-group { display:flex; gap:12px; flex-direction:column; }
+  /* リアクションボタン */
+  .reactions {
+    display:flex; justify-content:center; gap:10px;
+    margin-bottom:25px;
+    flex-wrap:wrap;
+  }
+  .reaction-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(150,220,255,0.3);
+    color:#fff;
+    padding:8px 14px; border-radius:20px;
+    cursor:pointer; transition:all 0.3s;
+    font-size:0.85em;
+    font-family:inherit;
+  }
+  .reaction-btn:hover {
+    background: rgba(150,220,255,0.2);
+    transform:translateY(-2px);
+  }
+  .reaction-btn.active {
+    background: linear-gradient(135deg, #ff9ec8, #80d8ff);
+    border-color: transparent;
+  }
+  .reaction-btn .count {
+    margin-left:5px; font-size:0.85em;
+    opacity:0.8;
+  }
+
+  .btn-group { display:flex; gap:10px; flex-direction:column; }
   .btn {
-    padding:16px 22px;
+    padding:15px 22px;
     border:none; 
     border-radius:30px;
     font-size:1em; 
@@ -427,387 +499,733 @@
     position:relative;
     overflow:hidden;
   }
-  .btn::before {
-    content:''; position:absolute;
-    inset:0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transform: translateX(-100%);
-    transition: transform 0.6s;
-  }
-  .btn:hover::before { transform: translateX(100%); }
   .btn:hover { transform:translateY(-3px); }
   .btn:active { transform:translateY(0); }
 
   .btn-primary {
-    background: linear-gradient(135deg, #ffd700 0%, #ff9ed8 50%, #b8a8ff 100%);
-    color:#2a0040;
+    background: linear-gradient(135deg, #80d8ff 0%, #ffb8e0 100%);
+    color:#001428;
     box-shadow: 
-      0 5px 20px rgba(255,180,220,0.5),
-      0 0 30px rgba(255,215,0,0.3);
-    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
-  }
-  .btn-primary:hover {
-    box-shadow: 
-      0 8px 30px rgba(255,180,220,0.7),
-      0 0 40px rgba(255,215,0,0.5);
+      0 5px 20px rgba(150,220,255,0.5),
+      0 0 30px rgba(255,180,220,0.3);
   }
 
   .btn-secondary {
     background: rgba(255,255,255,0.08);
     color:#fff;
-    border:1px solid rgba(255,215,0,0.4);
-    backdrop-filter: blur(5px);
+    border:1px solid rgba(150,220,255,0.4);
   }
   .btn-secondary:hover { 
     background: rgba(255,255,255,0.15);
-    border-color: rgba(255,215,0,0.7);
   }
 
-  /* 紙吹雪/星 */
+  .btn-share {
+    background: linear-gradient(135deg, #4a90c8, #2a6090);
+    color:#fff;
+    font-size:0.9em;
+  }
+
+  /* === 履歴モーダル === */
+  .history-list {
+    margin-top:15px;
+    max-height:400px;
+    overflow-y:auto;
+    padding-right:5px;
+  }
+  .history-list::-webkit-scrollbar { width:6px; }
+  .history-list::-webkit-scrollbar-track { background:rgba(255,255,255,0.05); }
+  .history-list::-webkit-scrollbar-thumb { background:rgba(150,220,255,0.5); border-radius:3px; }
+
+  .history-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(150,220,255,0.2);
+    padding:12px 16px;
+    margin-bottom:10px;
+    border-radius:12px;
+    text-align:left;
+    font-size:0.9em;
+    line-height:1.6;
+    animation: slideIn 0.4s ease-out;
+  }
+  @keyframes slideIn {
+    from { opacity:0; transform:translateX(-15px); }
+    to { opacity:1; transform:translateX(0); }
+  }
+  .history-time {
+    color:#80d8ff;
+    font-size:0.75em;
+    margin-bottom:4px;
+    opacity:0.7;
+  }
+
+  .empty-state {
+    color:#a8d8e8;
+    text-align:center;
+    padding:30px 20px;
+    font-size:0.95em;
+    line-height:1.8;
+    opacity:0.7;
+  }
+
+  /* === 問い未登録時 === */
+  .no-questions-overlay {
+    position:fixed; inset:0;
+    background: rgba(0,15,35,0.95);
+    backdrop-filter: blur(8px);
+    z-index:100;
+    display:none;
+    justify-content:center; align-items:center;
+    padding:20px;
+  }
+  .no-questions-overlay.show { display:flex; }
+  .no-questions-box {
+    background: linear-gradient(135deg, rgba(20,50,80,0.95), rgba(10,25,50,0.95));
+    border: 2px solid rgba(150,220,255,0.4);
+    padding: 40px 30px;
+    border-radius: 20px;
+    max-width: 380px;
+    text-align:center;
+    box-shadow: 0 0 40px rgba(150,220,255,0.3);
+  }
+  .no-questions-box h2 {
+    color:#80d8ff;
+    margin-bottom:15px;
+    font-weight:300;
+    letter-spacing:0.1em;
+  }
+  .no-questions-box p {
+    color:#c8f0ff;
+    line-height:1.8;
+    margin-bottom:20px;
+    font-size:0.95em;
+  }
+
+  /* === 紙吹雪 === */
   .sparkle {
     position:fixed; pointer-events:none; z-index:250;
-    font-size:1.8em;
+    font-size:1.6em;
   }
 
+  /* トースト通知 */
+  .toast {
+    position:fixed;
+    bottom:30px; left:50%;
+    transform:translateX(-50%) translateY(100px);
+    background: rgba(20,50,80,0.95);
+    backdrop-filter: blur(10px);
+    color:#fff;
+    padding:12px 24px;
+    border-radius:25px;
+    border:1px solid rgba(150,220,255,0.4);
+    z-index:400;
+    transition: transform 0.4s;
+    font-size:0.9em;
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
   @media (max-width:380px) {
-    .device-wrapper { width:280px; }
-    .orb { width:240px; height:240px; }
-    .ring-section { width:260px; }
-    .stand { width:260px; }
-    h1 { font-size:2em; }
+    .temple { width:280px; }
+    .pedestal { width:300px; }
+    .shell { width:200px; height:200px; }
+    h1 { font-size:1.9em; }
+    .stat-item { padding:6px 12px; font-size:0.75em; }
   }
 </style>
 </head>
 <body>
-  <div class="universe" id="universe"></div>
+  <div class="ocean" id="ocean"></div>
 
   <div class="container">
-    <div class="crown">👑</div>
-    <h1>問い<span>ガチャ</span></h1>
-    <p class="subtitle">星 か ら 授 か る 、 答 え の な い 問 い</p>
+    <div class="logo">🐚</div>
+    <h1>問<span>ガチャ</span></h1>
+    <p class="subtitle">海 底 神 殿 か ら の 問 い</p>
 
-    <div class="device-wrapper" id="device">
-      <div class="aura" id="aura"></div>
+    <!-- 統計バー -->
+    <div class="stats-bar">
+      <div class="stat-item">🎯 累計 <strong id="totalCount">0</strong>回</div>
+      <div class="stat-item">📚 問い <strong id="poolCount">0</strong>個</div>
+      <div class="stat-item">🌟 今日 <strong id="todayCount">0</strong>回</div>
+    </div>
 
-      <!-- 水晶球 -->
-      <div class="orb" id="orb">
-        <div class="core"></div>
-        <!-- 内部の星はJSで生成 -->
+    <!-- 神殿 -->
+    <div class="temple" id="temple">
+      <div class="halo"></div>
+      
+      <!-- 神殿の柱 -->
+      <div class="pillars">
+        <div class="pillar"></div>
+        <div class="pillar"></div>
       </div>
 
-      <!-- 金リング -->
-      <div class="ring-section">
-        <div class="ornate-ring">
-          <div class="ring-stars">
-            <span>✦</span><span>✧</span><span>✦</span><span>✧</span>
-            <span>✦</span><span>✧</span><span>✦</span>
+      <!-- 貝殻 -->
+      <div class="shell-area">
+        <div class="shell" id="shell">
+          <!-- 貝殻 上半分 -->
+          <div class="shell-top">
+            <svg viewBox="0 0 240 240">
+              <defs>
+                <radialGradient id="shellTopGrad" cx="50%" cy="100%" r="80%">
+                  <stop offset="0%" stop-color="#ffe0ec"/>
+                  <stop offset="40%" stop-color="#ffb8d8"/>
+                  <stop offset="80%" stop-color="#e88aae"/>
+                  <stop offset="100%" stop-color="#b85a82"/>
+                </radialGradient>
+              </defs>
+              <path d="M 20 130 Q 30 30 120 20 Q 210 30 220 130 Q 220 135 215 135 L 25 135 Q 20 135 20 130 Z" 
+                fill="url(#shellTopGrad)" stroke="#a04068" stroke-width="2"/>
+              <!-- 貝の筋 -->
+              <path d="M 120 25 Q 120 100 120 132" stroke="#c8688a" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path d="M 80 28 Q 90 90 95 132" stroke="#c8688a" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path d="M 160 28 Q 150 90 145 132" stroke="#c8688a" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path d="M 50 50 Q 65 90 70 132" stroke="#c8688a" stroke-width="1" fill="none" opacity="0.5"/>
+              <path d="M 190 50 Q 175 90 170 132" stroke="#c8688a" stroke-width="1" fill="none" opacity="0.5"/>
+            </svg>
           </div>
+          <!-- 貝殻 下半分 -->
+          <div class="shell-bottom">
+            <svg viewBox="0 0 240 240">
+              <defs>
+                <radialGradient id="shellBottomGrad" cx="50%" cy="0%" r="80%">
+                  <stop offset="0%" stop-color="#ffe0ec"/>
+                  <stop offset="40%" stop-color="#ffb8d8"/>
+                  <stop offset="80%" stop-color="#e88aae"/>
+                  <stop offset="100%" stop-color="#b85a82"/>
+                </radialGradient>
+              </defs>
+              <path d="M 20 110 Q 30 210 120 220 Q 210 210 220 110 Q 220 105 215 105 L 25 105 Q 20 105 20 110 Z" 
+                fill="url(#shellBottomGrad)" stroke="#a04068" stroke-width="2"/>
+              <path d="M 120 215 Q 120 140 120 108" stroke="#c8688a" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path d="M 80 212 Q 90 150 95 108" stroke="#c8688a" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path d="M 160 212 Q 150 150 145 108" stroke="#c8688a" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path d="M 50 190 Q 65 150 70 108" stroke="#c8688a" stroke-width="1" fill="none" opacity="0.5"/>
+              <path d="M 190 190 Q 175 150 170 108" stroke="#c8688a" stroke-width="1" fill="none" opacity="0.5"/>
+            </svg>
+          </div>
+          <!-- 真珠 -->
+          <div class="pearl"></div>
         </div>
+        <div class="shell-hint" id="shellHint">▽ 貝殻にタップ ▽</div>
       </div>
 
-      <!-- スタンド＋表示窓 -->
-      <div class="stand">
-        <div class="window-frame">
-          <div class="window">
-            <div class="window-text" id="windowText">
-              ✦ 球に触れて願いを ✦
-            </div>
-            <div class="star-drop" id="starDrop">
-              <svg viewBox="0 0 50 50">
-                <polygon points="25,2 31,18 48,19 34,30 39,47 25,38 11,47 16,30 2,19 19,18" 
-                  fill="currentColor" stroke="#fff" stroke-width="1"/>
-              </svg>
-            </div>
-          </div>
-        </div>
+      <!-- 基壇 -->
+      <div class="pedestal">
+        <div class="runes">✦ ☽ ❀ ☆ ❀ ☽ ✦</div>
       </div>
     </div>
 
-    <p class="tap-hint">
-      <span class="pulse">✦</span> 水 晶 球 を タ ッ プ <span class="pulse">✦</span>
-    </p>
+    <!-- メニューボタン -->
+    <div class="tab-menu">
+      <button class="tab-btn" onclick="showHistory()">📜 履歴を見る</button>
+      <button class="tab-btn" onclick="showStats()">📊 みんなの統計</button>
+      <button class="tab-btn" onclick="showAbout()">💡 遊び方</button>
+    </div>
   </div>
 
-  <!-- モーダル -->
-  <div class="modal" id="modal">
+  <!-- 結果モーダル -->
+  <div class="modal" id="resultModal">
     <div class="modal-content">
-      <div class="modal-crown">✨</div>
-      <div class="question-label">星 か ら の 問 い</div>
+      <div class="modal-icon">🐚</div>
+      <div class="question-no" id="questionNo"></div>
+      <div class="question-label">海 か ら の 問 い</div>
       <div class="question-text" id="questionText"></div>
+      
+      <div class="reactions">
+        <button class="reaction-btn" data-r="deep">🤔 深い <span class="count" id="r-deep">0</span></button>
+        <button class="reaction-btn" data-r="warm">💝 沁みる <span class="count" id="r-warm">0</span></button>
+        <button class="reaction-btn" data-r="hard">😅 難しい <span class="count" id="r-hard">0</span></button>
+        <button class="reaction-btn" data-r="fun">🎉 面白い <span class="count" id="r-fun">0</span></button>
+      </div>
+
       <div class="btn-group">
-        <button class="btn btn-primary" onclick="spinAgain()">✦ もう一度、星を呼ぶ ✦</button>
-        <button class="btn btn-secondary" onclick="backToTitle()">夜空に戻る</button>
+        <button class="btn btn-primary" onclick="spinAgain()">🐚 もう一度、貝を開く</button>
+        <button class="btn btn-share" onclick="shareQuestion()">📤 この問いをシェア</button>
+        <button class="btn btn-secondary" onclick="backToTitle()">海面に戻る</button>
       </div>
     </div>
   </div>
+
+  <!-- 履歴モーダル -->
+  <div class="modal" id="historyModal">
+    <div class="modal-content">
+      <div class="modal-icon">📜</div>
+      <div class="question-label">引 い た 問 い の 履 歴</div>
+      <div class="history-list" id="historyList"></div>
+      <div class="btn-group" style="margin-top:20px;">
+        <button class="btn btn-secondary" onclick="clearHistory()">🗑 履歴を消す</button>
+        <button class="btn btn-secondary" onclick="closeModal('historyModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 統計モーダル -->
+  <div class="modal" id="statsModal">
+    <div class="modal-content">
+      <div class="modal-icon">📊</div>
+      <div class="question-label">統 計</div>
+      <div id="statsContent" style="text-align:left; padding:0 10px;"></div>
+      <div class="btn-group" style="margin-top:20px;">
+        <button class="btn btn-secondary" onclick="closeModal('statsModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 遊び方モーダル -->
+  <div class="modal" id="aboutModal">
+    <div class="modal-content">
+      <div class="modal-icon">💡</div>
+      <div class="question-label">遊 び 方</div>
+      <div style="text-align:left; line-height:2; padding:0 10px; color:#c8f0ff;">
+        🐚 貝殻をタップすると、海底神殿から問いが浮かび上がります<br><br>
+        💝 出てきた問いに、自分なりの答えを心の中で考えてみてください<br><br>
+        🎉 リアクションボタンで感想を残せます<br><br>
+        📤 気に入った問いはシェアして、誰かと一緒に考えてみましょう<br><br>
+        📜 履歴から過去に引いた問いを振り返れます<br><br>
+        ✨ 答えのない問いだからこそ、何度も考えたくなる
+      </div>
+      <div class="btn-group" style="margin-top:20px;">
+        <button class="btn btn-secondary" onclick="closeModal('aboutModal')">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 問い未登録時 -->
+  <div class="no-questions-overlay" id="noQuestionsOverlay">
+    <div class="no-questions-box">
+      <h2>🐚 準備中 🐚</h2>
+      <p>
+        海底神殿はまだ静まり返っています。<br><br>
+        管理者が問いを登録すると、<br>ここに問いが現れます。<br><br>
+        しばらくお待ちください。
+      </p>
+    </div>
+  </div>
+
+  <!-- トースト -->
+  <div class="toast" id="toast"></div>
 
 <script>
-  // === 背景の星々を生成 ===
-  const universe = document.getElementById('universe');
-  for (let i = 0; i < 80; i++) {
-    const s = document.createElement('div');
-    s.className = 'star-bg';
-    s.style.left = Math.random()*100 + '%';
-    s.style.top = Math.random()*100 + '%';
-    s.style.setProperty('--dur', (2 + Math.random()*3) + 's');
-    s.style.animationDelay = Math.random()*3 + 's';
-    if (Math.random() > 0.7) {
-      s.style.width = '3px'; s.style.height = '3px';
-    }
-    universe.appendChild(s);
+  // ===== 海中背景の生成 =====
+  const ocean = document.getElementById('ocean');
+  // 光線
+  for (let i = 0; i < 4; i++) {
+    const r = document.createElement('div');
+    r.className = 'light-ray';
+    r.style.left = (10 + i*25) + '%';
+    r.style.animationDelay = (i*2) + 's';
+    ocean.appendChild(r);
   }
-  // 流れ星
+  // 泡
+  for (let i = 0; i < 25; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 5 + Math.random()*20;
+    b.style.width = size + 'px';
+    b.style.height = size + 'px';
+    b.style.left = Math.random()*100 + '%';
+    b.style.animationDuration = (8 + Math.random()*10) + 's';
+    b.style.animationDelay = Math.random()*15 + 's';
+    ocean.appendChild(b);
+  }
+  // 魚
+  const fishEmojis = ['🐟','🐠','🐡'];
+  for (let i = 0; i < 5; i++) {
+    const f = document.createElement('div');
+    f.className = 'fish';
+    f.textContent = fishEmojis[i % 3];
+    f.style.top = (20 + Math.random()*60) + '%';
+    f.style.animationDuration = (20 + Math.random()*15) + 's';
+    f.style.animationDelay = (i*4 + Math.random()*5) + 's';
+    ocean.appendChild(f);
+  }
+  // クラゲ
   for (let i = 0; i < 3; i++) {
-    const ss = document.createElement('div');
-    ss.className = 'shooting-star';
-    ss.style.top = (Math.random()*40) + '%';
-    ss.style.animationDelay = (i*5 + Math.random()*3) + 's';
-    universe.appendChild(ss);
+    const j = document.createElement('div');
+    j.className = 'jellyfish';
+    j.textContent = '🪼';
+    j.style.left = (15 + i*30 + Math.random()*10) + '%';
+    j.style.top = (20 + Math.random()*60) + '%';
+    j.style.animationDelay = (i*3) + 's';
+    ocean.appendChild(j);
   }
 
-  // === 水晶球内部の星 ===
-  const orb = document.getElementById('orb');
-  const innerStars = [];
-  for (let i = 0; i < 12; i++) {
-    const star = document.createElement('div');
-    const colors = ['s1','s2','s3','s4','s5'];
-    star.className = 'inner-star ' + colors[i % 5];
-    const radius = 40 + Math.random()*70;
-    const duration = 6 + Math.random()*8;
-    star.style.setProperty('--r', radius + 'px');
-    star.style.setProperty('--dur', duration + 's');
-    star.style.left = '50%';
-    star.style.top = '50%';
-    star.style.animationDelay = (-Math.random()*duration) + 's';
-    orb.appendChild(star);
-    innerStars.push(star);
-  }
+  // ===== データ管理 =====
+  const STORAGE_KEYS = {
+    questions: 'toiGachaQuestions',
+    history: 'toiGachaHistory',
+    stats: 'toiGachaStats',
+    reactions: 'toiGachaReactions'
+  };
 
-  // === 問い ===
-  const DEFAULT_QUESTIONS = [
-    "もし明日世界が終わるなら、最後に誰と何を話したい？",
-    "あなたにとって「自由」とは何ですか？",
-    "10年前の自分に一言だけ伝えられるとしたら？",
-    "幸せの定義を、自分の言葉で言うと？",
-    "失敗から学んだ最大のことは何ですか？"
-  ];
   function getQuestions() {
-    const stored = localStorage.getItem('toiGachaQuestions');
+    const stored = localStorage.getItem(STORAGE_KEYS.questions);
     if (stored) {
       const arr = JSON.parse(stored);
-      if (arr.length > 0) return arr;
+      return Array.isArray(arr) ? arr : [];
     }
-    return DEFAULT_QUESTIONS;
+    return [];
   }
 
-  // === 要素 ===
-  const device = document.getElementById('device');
-  const aura = document.getElementById('aura');
-  const windowText = document.getElementById('windowText');
-  const starDrop = document.getElementById('starDrop');
-  const modal = document.getElementById('modal');
-  const questionText = document.getElementById('questionText');
+  function getHistory() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.history) || '[]');
+  }
+  function saveHistory(arr) {
+    localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(arr));
+  }
+  function addHistory(question) {
+    const h = getHistory();
+    h.unshift({ q: question, t: Date.now() });
+    if (h.length > 50) h.pop();
+    saveHistory(h);
+  }
 
-  let isSpinning = false;
-  let tapCount = 0;
+  function getStats() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.stats) || '{"total":0,"days":{}}');
+  }
+  function saveStats(s) {
+    localStorage.setItem(STORAGE_KEYS.stats, JSON.stringify(s));
+  }
+  function incrementStats() {
+    const s = getStats();
+    s.total = (s.total || 0) + 1;
+    const today = new Date().toISOString().slice(0,10);
+    s.days = s.days || {};
+    s.days[today] = (s.days[today] || 0) + 1;
+    saveStats(s);
+    updateStatsBar();
+  }
 
-  // === 効果音 ===
+  function getReactions() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.reactions) || '{}');
+  }
+  function saveReactions(r) {
+    localStorage.setItem(STORAGE_KEYS.reactions, JSON.stringify(r));
+  }
+
+  function updateStatsBar() {
+    const s = getStats();
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById('totalCount').textContent = s.total || 0;
+    document.getElementById('poolCount').textContent = getQuestions().length;
+    document.getElementById('todayCount').textContent = (s.days && s.days[today]) || 0;
+  }
+
+  // ===== 効果音 =====
   let audioCtx;
   function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  // タップ時のキラキラ音
-  function playChime() {
-    if (!audioCtx) return;
-    const freqs = [1318.51, 1567.98, 1975.53];
-    freqs.forEach((f, i) => {
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.connect(g); g.connect(audioCtx.destination);
-      o.frequency.value = f; o.type = 'sine';
-      const t = audioCtx.currentTime + i * 0.04;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.08, t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-      o.start(t); o.stop(t + 0.4);
-    });
-  }
-  // 星が落ちる音
-  function playStarFall() {
+  function playBubbleSound() {
     if (!audioCtx) return;
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
     o.connect(g); g.connect(audioCtx.destination);
-    o.frequency.setValueAtTime(2000, audioCtx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.6);
+    o.frequency.setValueAtTime(300, audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15);
     o.type = 'sine';
-    g.gain.setValueAtTime(0.15, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
-    o.start(); o.stop(audioCtx.currentTime + 0.6);
+    g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+    o.start(); o.stop(audioCtx.currentTime + 0.2);
   }
-  // ファンファーレ（神秘的）
+  function playShellOpen() {
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.setValueAtTime(150, audioCtx.currentTime);
+    o.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.4);
+    o.type = 'triangle';
+    g.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+    o.start(); o.stop(audioCtx.currentTime + 0.5);
+  }
   function playFanfare() {
     if (!audioCtx) return;
-    const notes = [
-      [523.25, 0],     // C
-      [659.25, 0.1],   // E
-      [783.99, 0.2],   // G
-      [1046.50, 0.3],  // C
-      [1318.51, 0.45], // E
-    ];
-    notes.forEach(([freq, delay]) => {
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+    notes.forEach((freq, i) => {
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
       const filter = audioCtx.createBiquadFilter();
       o.connect(filter); filter.connect(g); g.connect(audioCtx.destination);
       filter.type = 'lowpass';
-      filter.frequency.value = 3000;
-      o.frequency.value = freq; o.type = 'triangle';
-      const t = audioCtx.currentTime + delay;
+      filter.frequency.value = 3500;
+      o.frequency.value = freq; o.type = 'sine';
+      const t = audioCtx.currentTime + i * 0.08;
       g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.18, t + 0.05);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
-      o.start(t); o.stop(t + 0.8);
+      g.gain.linearRampToValueAtTime(0.18, t + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+      o.start(t); o.stop(t + 0.7);
     });
   }
 
-  // === タップで起動 ===
-  function activateOrb(e) {
-    if (isSpinning) return;
-    initAudio();
-    
-    tapCount++;
-    playChime();
+  // ===== ガチャ動作 =====
+  const shell = document.getElementById('shell');
+  const shellHint = document.getElementById('shellHint');
+  const temple = document.getElementById('temple');
+  const resultModal = document.getElementById('resultModal');
+  const questionText = document.getElementById('questionText');
+  const questionNo = document.getElementById('questionNo');
+  const noQuestionsOverlay = document.getElementById('noQuestionsOverlay');
 
-    // タップ時の波紋効果
-    createRipple(e);
+  let isSpinning = false;
+  let currentQuestion = '';
 
-    // タップで段階的に光が強くなる
-    if (tapCount === 1) {
-      orb.classList.add('glowing');
-      windowText.innerHTML = '✦ 星 が 共 鳴 し て い る ✦';
-    } else if (tapCount === 2) {
-      windowText.innerHTML = '✦ も う 少 し … ✦';
-    } else if (tapCount >= 3) {
-      tapCount = 0;
-      triggerGacha();
+  function checkQuestions() {
+    const qs = getQuestions();
+    if (qs.length === 0) {
+      noQuestionsOverlay.classList.add('show');
+      return false;
     }
-    e.preventDefault();
+    noQuestionsOverlay.classList.remove('show');
+    return true;
   }
 
-  function createRipple(e) {
-    const rect = orb.getBoundingClientRect();
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-    const ripple = document.createElement('div');
-    ripple.style.cssText = `
-      position:absolute; left:${x}px; top:${y}px;
-      width:10px; height:10px; border-radius:50%;
-      background:radial-gradient(circle, rgba(255,215,0,0.8), transparent);
-      transform:translate(-50%,-50%);
-      pointer-events:none; z-index:10;
-    `;
-    orb.appendChild(ripple);
-    ripple.animate([
-      { width:'10px', height:'10px', opacity:1 },
-      { width:'250px', height:'250px', opacity:0 }
-    ], { duration:800, easing:'ease-out' });
-    setTimeout(()=>ripple.remove(), 800);
-  }
-
-  // === ガチャ起動 ===
-  function triggerGacha() {
+  function openShell() {
     if (isSpinning) return;
+    if (!checkQuestions()) return;
+
+    initAudio();
     isSpinning = true;
+    shellHint.style.display = 'none';
 
-    device.classList.add('shaking');
-    orb.classList.add('spinning', 'glowing');
-    aura.classList.add('intense');
-    windowText.innerHTML = '✨ 星 が 集 ま っ て い る ✨';
-
-    // チャイム連続
-    let chimeInterval = setInterval(playChime, 250);
+    // 振動 + 泡音
+    temple.classList.add('shaking');
+    let bubbleInterval = setInterval(playBubbleSound, 180);
 
     setTimeout(() => {
-      clearInterval(chimeInterval);
-      device.classList.remove('shaking');
-      orb.classList.remove('spinning');
-      windowText.innerHTML = '';
+      clearInterval(bubbleInterval);
+      temple.classList.remove('shaking');
 
-      // 星カラーをランダム選択
-      const starColors = ['#ffd700', '#ff9ed8', '#b8a8ff', '#a8e6f5', '#fff5b8'];
-      starDrop.style.color = starColors[Math.floor(Math.random()*starColors.length)];
-      starDrop.classList.remove('drop');
-      void starDrop.offsetWidth;
-      starDrop.classList.add('drop');
-      
-      setTimeout(playStarFall, 200);
+      // 貝が開く
+      shell.classList.add('opening');
+      playShellOpen();
 
-      // 結果表示
       setTimeout(() => {
         playFanfare();
-        showStarBurst();
+        showSparkles();
+
         const questions = getQuestions();
-        const picked = questions[Math.floor(Math.random() * questions.length)];
-        questionText.textContent = picked;
-        modal.classList.add('show');
-        
+        const idx = Math.floor(Math.random() * questions.length);
+        currentQuestion = questions[idx];
+        questionText.textContent = currentQuestion;
+        questionNo.textContent = `No.${idx + 1} / ${questions.length}`;
+
+        // 履歴と統計
+        addHistory(currentQuestion);
+        incrementStats();
+
+        // リアクション数表示
+        updateReactionDisplay();
+
+        resultModal.classList.add('show');
+
         setTimeout(() => {
-          starDrop.classList.remove('drop');
-          windowText.innerHTML = '✦ 球 に 触 れ て 願 い を ✦';
-          orb.classList.remove('glowing');
-          aura.classList.remove('intense');
+          shell.classList.remove('opening');
+          shellHint.style.display = 'block';
           isSpinning = false;
-        }, 600);
-      }, 1700);
-    }, 1800);
+        }, 500);
+      }, 900);
+    }, 1500);
   }
 
-  // 星の爆発演出
-  function showStarBurst() {
-    const symbols = ['✦','✧','⭐','✨','🌟','💫','★','☆','✩','🌠'];
-    for (let i = 0; i < 50; i++) {
+  function showSparkles() {
+    const symbols = ['✨','🌟','⭐','💫','🐚','🪸','🫧','💎'];
+    for (let i = 0; i < 40; i++) {
       const s = document.createElement('div');
       s.className = 'sparkle';
       s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
-      const colors = ['#ffd700', '#ff9ed8', '#b8a8ff', '#a8e6f5', '#fff5b8', '#fff'];
-      s.style.color = colors[Math.floor(Math.random()*colors.length)];
       s.style.left = '50vw';
       s.style.top = '50vh';
-      s.style.textShadow = '0 0 10px currentColor, 0 0 20px currentColor';
       document.body.appendChild(s);
-      
-      const angle = (i / 50) * Math.PI * 2 + Math.random()*0.3;
-      const dist = 200 + Math.random()*500;
+      const angle = (i / 40) * Math.PI * 2 + Math.random()*0.3;
+      const dist = 200 + Math.random()*450;
       const dx = Math.cos(angle) * dist;
       const dy = Math.sin(angle) * dist;
-      
       s.animate([
         { transform:'translate(0,0) scale(0) rotate(0)', opacity:1 },
-        { transform:`translate(${dx}px,${dy}px) scale(${1 + Math.random()}) rotate(${Math.random()*720}deg)`, opacity:0 }
-      ], { duration:1500 + Math.random()*800, easing:'cubic-bezier(0.2, 0.8, 0.4, 1)' });
+        { transform:`translate(${dx}px,${dy}px) scale(${1+Math.random()}) rotate(${Math.random()*720}deg)`, opacity:0 }
+      ], { duration:1600 + Math.random()*600, easing:'cubic-bezier(0.2, 0.8, 0.4, 1)' });
       setTimeout(()=>s.remove(), 2300);
     }
   }
 
-  function spinAgain() { 
-    modal.classList.remove('show');
-    // すぐにまた引きたくなる演出（軽いキラキラ）
-    setTimeout(()=>{
-      windowText.innerHTML = '✦ ま た 星 が 待 っ て い る ✦';
-      setTimeout(()=>{
-        windowText.innerHTML = '✦ 球 に 触 れ て 願 い を ✦';
-      }, 1500);
-    }, 300);
+  // ===== リアクション =====
+  function updateReactionDisplay() {
+    const reactions = getReactions();
+    const qReactions = reactions[currentQuestion] || {};
+    ['deep','warm','hard','fun'].forEach(r => {
+      document.getElementById('r-' + r).textContent = qReactions[r] || 0;
+    });
+    // ボタンのアクティブ状態リセット
+    document.querySelectorAll('.reaction-btn').forEach(btn => btn.classList.remove('active'));
   }
-  function backToTitle() { 
-    modal.classList.remove('show');
+
+  document.querySelectorAll('.reaction-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.r;
+      const reactions = getReactions();
+      if (!reactions[currentQuestion]) reactions[currentQuestion] = {};
+      reactions[currentQuestion][type] = (reactions[currentQuestion][type] || 0) + 1;
+      saveReactions(reactions);
+      btn.classList.add('active');
+      document.getElementById('r-' + type).textContent = reactions[currentQuestion][type];
+      // 軽いアニメーション
+      btn.animate([
+        { transform:'scale(1)' },
+        { transform:'scale(1.2)' },
+        { transform:'scale(1)' }
+      ], { duration:300 });
+    });
+  });
+
+  // ===== シェア =====
+  function shareQuestion() {
+    const text = `【問いガチャ】\n「${currentQuestion}」\n\nあなたなら、この問いにどう答える？\n#問いガチャ`;
+    if (navigator.share) {
+      navigator.share({ text }).catch(()=>{});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('✨ クリップボードにコピーしました');
+      });
+    } else {
+      showToast('📤 シェアに対応していません');
+    }
+  }
+
+  // ===== トースト =====
+  const toast = document.getElementById('toast');
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  // ===== 履歴 =====
+  function showHistory() {
+    const list = document.getElementById('historyList');
+    const h = getHistory();
+    if (h.length === 0) {
+      list.innerHTML = '<div class="empty-state">🐚 まだ問いを引いていません<br>貝殻をタップして始めましょう</div>';
+    } else {
+      list.innerHTML = h.map(item => {
+        const d = new Date(item.t);
+        const time = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        return `<div class="history-item">
+          <div class="history-time">🕐 ${time}</div>
+          ${item.q.replace(/</g,'&lt;')}
+        </div>`;
+      }).join('');
+    }
+    document.getElementById('historyModal').classList.add('show');
+  }
+
+  function clearHistory() {
+    if (!confirm('履歴をすべて削除しますか？')) return;
+    saveHistory([]);
+    showHistory();
+    showToast('🗑 履歴を削除しました');
+  }
+
+  // ===== 統計 =====
+  function showStats() {
+    const s = getStats();
+    const h = getHistory();
+    const reactions = getReactions();
+
+    // 人気の問いTOP3
+    const counts = {};
+    h.forEach(item => { counts[item.q] = (counts[item.q] || 0) + 1; });
+    const topQuestions = Object.entries(counts)
+      .sort((a,b) => b[1] - a[1])
+      .slice(0,3);
+
+    // リアクション集計
+    let totalReactions = { deep:0, warm:0, hard:0, fun:0 };
+    Object.values(reactions).forEach(r => {
+      ['deep','warm','hard','fun'].forEach(k => {
+        totalReactions[k] += (r[k] || 0);
+      });
+    });
+
+    const today = new Date().toISOString().slice(0,10);
+    const todayCount = (s.days && s.days[today]) || 0;
+
+    const content = document.getElementById('statsContent');
+    content.innerHTML = `
+      <div style="background:rgba(255,255,255,0.06); padding:15px; border-radius:12px; margin-bottom:12px;">
+        <div style="color:#80d8ff; font-size:0.85em; margin-bottom:5px;">🎯 累計引いた回数</div>
+        <div style="font-size:2em; color:#ffd700; font-weight:bold;">${s.total || 0} <span style="font-size:0.5em; color:#fff;">回</span></div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06); padding:15px; border-radius:12px; margin-bottom:12px;">
+        <div style="color:#80d8ff; font-size:0.85em; margin-bottom:5px;">🌟 今日の回数</div>
+        <div style="font-size:1.5em; color:#ffb8e0;">${todayCount} 回</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06); padding:15px; border-radius:12px; margin-bottom:12px;">
+        <div style="color:#80d8ff; font-size:0.85em; margin-bottom:8px;">💝 つけたリアクション</div>
+        <div style="font-size:0.95em; line-height:2;">
+          🤔 深い: <strong style="color:#ffd700;">${totalReactions.deep}</strong> ／
+          💝 沁みる: <strong style="color:#ffd700;">${totalReactions.warm}</strong><br>
+          😅 難しい: <strong style="color:#ffd700;">${totalReactions.hard}</strong> ／
+          🎉 面白い: <strong style="color:#ffd700;">${totalReactions.fun}</strong>
+        </div>
+      </div>
+      ${topQuestions.length > 0 ? `
+        <div style="background:rgba(255,255,255,0.06); padding:15px; border-radius:12px;">
+          <div style="color:#80d8ff; font-size:0.85em; margin-bottom:10px;">🏆 よく出会った問い TOP3</div>
+          ${topQuestions.map((tq, i) => `
+            <div style="margin-bottom:8px; padding:8px; background:rgba(255,255,255,0.04); border-radius:8px; font-size:0.9em;">
+              <strong style="color:#ffd700;">${i+1}位</strong> (${tq[1]}回)<br>
+              <span style="opacity:0.9;">${tq[0].replace(/</g,'&lt;')}</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    `;
+    document.getElementById('statsModal').classList.add('show');
+  }
+
+  function showAbout() {
+    document.getElementById('aboutModal').classList.add('show');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+
+  function spinAgain() {
+    resultModal.classList.remove('show');
+    setTimeout(() => {
+      // 「もう一度引きたくなる」誘導
+      showToast('🐚 また新しい問いが眠っています...');
+    }, 400);
+  }
+
+  function backToTitle() {
+    resultModal.classList.remove('show');
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
-  // イベント登録
-  orb.addEventListener('click', activateOrb);
-  orb.addEventListener('touchstart', activateOrb, {passive:false});
+  // ===== イベント =====
+  shell.addEventListener('click', openShell);
+
+  // モーダル外クリックで閉じる
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', e => {
+      if (e.target === m) m.classList.remove('show');
+    });
+  });
+
+  // 問いの登録状況を定期チェック（管理者が追加したらすぐ反映）
+  setInterval(updateStatsBar, 2000);
+  
+  // 初期化
+  updateStatsBar();
+  checkQuestions();
+
+  // ストレージ変更を監視（同タブで管理画面と切り替えても反映）
+  window.addEventListener('storage', () => {
+    updateStatsBar();
+    checkQuestions();
+  });
 </script>
 </body>
 </html>
