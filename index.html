@@ -4,91 +4,379 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>問いガチャ | Podcast企画</title>
+<title>🎀 問いガチャ 🎀</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body {
-    font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    font-family: 'Hiragino Maru Gothic ProN', 'Quicksand', sans-serif;
+    background: linear-gradient(135deg, #ffd1dc 0%, #ffe0f0 50%, #e0f7ff 100%);
     min-height: 100vh; display:flex; justify-content:center; align-items:center;
-    overflow:hidden; user-select:none;
+    overflow-x:hidden; user-select:none; padding:20px 10px;
+    position:relative;
   }
-  .container { text-align:center; padding:20px; max-width:500px; width:100%; }
-  h1 { font-size:2.2em; color:#5a3921; margin-bottom:30px; text-shadow:2px 2px 4px rgba(255,255,255,0.5); }
+  /* 背景の浮遊する星 */
+  body::before, body::after {
+    content:''; position:fixed; pointer-events:none; z-index:0;
+  }
+  .floating-deco {
+    position:fixed; pointer-events:none; z-index:0;
+    font-size:1.5em; opacity:0.5;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform:translateY(100vh) rotate(0); }
+    100% { transform:translateY(-10vh) rotate(360deg); }
+  }
 
-  /* ガチャ本体 */
-  .gacha {
-    width:280px; height:340px; margin:0 auto; position:relative;
-    background:linear-gradient(180deg, #ff6b6b 0%, #ee5a52 50%, #c0392b 50%, #a93226 100%);
-    border-radius:20px; box-shadow:0 15px 40px rgba(0,0,0,0.3);
+  .container { text-align:center; z-index:1; position:relative; }
+
+  h1 {
+    font-size:2.4em; color:#ff6b9d; margin-bottom:8px;
+    text-shadow: 3px 3px 0 #fff, 4px 4px 0 #ffb8d4;
+    letter-spacing:0.05em;
+    animation: titleBounce 2s ease-in-out infinite;
   }
-  .gacha-window {
-    position:absolute; top:30px; left:50%; transform:translateX(-50%);
-    width:200px; height:140px; background:rgba(255,255,255,0.95);
-    border-radius:15px; border:5px solid #8b4513;
-    display:flex; align-items:center; justify-content:center;
+  @keyframes titleBounce {
+    0%,100% { transform:scale(1); }
+    50% { transform:scale(1.05); }
+  }
+  .subtitle { color:#a86b8c; margin-bottom:20px; font-size:0.95em; }
+
+  /* === ガチャポンマシン本体 === */
+  .gacha-machine {
+    width:300px; margin:0 auto; position:relative;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.25));
+  }
+
+  /* 上部 - カプセルが入っているドーム */
+  .dome {
+    width:280px; height:240px; margin:0 auto;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.7) 0%,
+      rgba(255,230,240,0.5) 50%,
+      rgba(255,200,220,0.4) 100%);
+    border:4px solid #ff8fb1;
+    border-bottom:none;
+    border-radius: 140px 140px 20px 20px;
+    position:relative;
     overflow:hidden;
+    box-shadow: inset -15px -15px 30px rgba(255,150,180,0.3),
+                inset 15px 15px 30px rgba(255,255,255,0.6);
   }
-  .gacha-window-text { font-size:1em; color:#333; font-weight:bold; padding:10px; text-align:center; }
+  /* ハイライト */
+  .dome::before {
+    content:''; position:absolute;
+    top:20px; left:30px; width:60px; height:100px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.8), transparent);
+    border-radius:50%;
+    transform: rotate(-20deg);
+  }
 
-  /* つまみ（スワイプ部分） */
-  .gacha-knob {
-    position:absolute; bottom:30px; left:50%; transform:translateX(-50%);
-    width:90px; height:90px; background:radial-gradient(circle at 35% 35%, #ffd700, #b8860b);
-    border-radius:50%; cursor:grab; box-shadow:0 5px 15px rgba(0,0,0,0.4);
+  /* カプセルたち */
+  .capsules {
+    position:absolute; bottom:10px; left:0; right:0;
+    height:80%;
+    display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end;
+    padding:0 20px;
+    gap:4px;
+  }
+  .capsule {
+    width:38px; height:38px; border-radius:50%;
+    position:relative;
+    box-shadow: inset -4px -4px 8px rgba(0,0,0,0.15),
+                inset 3px 3px 6px rgba(255,255,255,0.6),
+                0 2px 4px rgba(0,0,0,0.1);
+    animation: jiggle 3s ease-in-out infinite;
+  }
+  .capsule::after {
+    content:''; position:absolute;
+    top:5px; left:8px; width:10px; height:8px;
+    background:rgba(255,255,255,0.7); border-radius:50%;
+  }
+  .capsule.shake { animation: shakeCapsule 0.3s ease-in-out infinite; }
+  @keyframes jiggle {
+    0%,100% { transform:translateY(0) rotate(0); }
+    50% { transform:translateY(-2px) rotate(3deg); }
+  }
+  @keyframes shakeCapsule {
+    0%,100% { transform:translate(0,0) rotate(0); }
+    25% { transform:translate(-3px,-2px) rotate(-15deg); }
+    50% { transform:translate(2px,-3px) rotate(10deg); }
+    75% { transform:translate(-2px,1px) rotate(-8deg); }
+  }
+  .capsule.c1 { background: linear-gradient(135deg, #ff9eb5, #ff6b9d); }
+  .capsule.c2 { background: linear-gradient(135deg, #a8e6f0, #6bcfee); }
+  .capsule.c3 { background: linear-gradient(135deg, #ffe69e, #ffd166); }
+  .capsule.c4 { background: linear-gradient(135deg, #c8a8f0, #a875e0); }
+  .capsule.c5 { background: linear-gradient(135deg, #b5e8a8, #82d670); }
+
+  /* 中央 - 本体ボディ */
+  .body-section {
+    width:300px; height:240px;
+    background: linear-gradient(180deg, #ff6b9d 0%, #ff5188 50%, #d63d6f 100%);
+    border-radius: 0 0 25px 25px;
+    position:relative;
+    box-shadow: inset -10px 0 20px rgba(0,0,0,0.15),
+                inset 10px 0 20px rgba(255,255,255,0.15);
+  }
+  /* ロゴラベル */
+  .logo-label {
+    position:absolute; top:15px; left:50%; transform:translateX(-50%);
+    background: #fff; padding:6px 18px; border-radius:20px;
+    font-size:0.85em; font-weight:bold; color:#ff5188;
+    box-shadow: 0 3px 0 #c93063, 0 5px 8px rgba(0,0,0,0.2);
+    letter-spacing:0.1em;
+  }
+  .logo-label::before { content:'⭐ '; }
+  .logo-label::after { content:' ⭐'; }
+
+  /* 取り出し口 */
+  .slot {
+    position:absolute; top:75px; left:50%; transform:translateX(-50%);
+    width:160px; height:100px;
+    background: linear-gradient(180deg, #2c1810 0%, #1a0f08 100%);
+    border-radius: 12px;
+    border: 4px solid #8b4513;
+    box-shadow: inset 0 5px 15px rgba(0,0,0,0.7);
+    overflow:hidden;
     display:flex; align-items:center; justify-content:center;
-    transition: transform 0.1s;
   }
-  .gacha-knob.spinning { animation: spin 0.6s linear infinite; }
-  @keyframes spin { from{transform:translateX(-50%) rotate(0)} to{transform:translateX(-50%) rotate(360deg)} }
-  .gacha-knob::before { content:'➤'; color:#fff; font-size:1.8em; }
+  .slot-message {
+    color:#ffd166; font-size:0.9em; font-weight:bold;
+    text-align:center; padding:5px;
+    text-shadow: 0 0 8px rgba(255,209,102,0.6);
+  }
 
-  .hint { margin-top:20px; color:#5a3921; font-size:0.95em; }
+  /* 落ちてくるカプセル（演出用） */
+  .falling-capsule {
+    position:absolute; width:50px; height:50px; border-radius:50%;
+    background: linear-gradient(135deg, #ff9eb5, #ff6b9d);
+    box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2),
+                inset 4px 4px 8px rgba(255,255,255,0.6),
+                0 4px 10px rgba(0,0,0,0.3);
+    top:-60px; left:50%; transform:translateX(-50%);
+    opacity:0; z-index:5;
+  }
+  .falling-capsule::after {
+    content:''; position:absolute;
+    top:8px; left:12px; width:14px; height:10px;
+    background:rgba(255,255,255,0.7); border-radius:50%;
+  }
+  .falling-capsule.drop {
+    animation: dropCapsule 1.4s cubic-bezier(0.5, 0, 0.7, 1) forwards;
+  }
+  @keyframes dropCapsule {
+    0% { top:-60px; opacity:0; transform:translateX(-50%) rotate(0); }
+    20% { opacity:1; }
+    50% { top:30px; transform:translateX(-50%) rotate(180deg); }
+    70% { top:55px; transform:translateX(-50%) rotate(270deg); }
+    85% { top:45px; transform:translateX(-50%) rotate(320deg); }
+    100% { top:50px; opacity:1; transform:translateX(-50%) rotate(360deg); }
+  }
 
-  /* モーダル */
+  /* ハンドル（つまみ） */
+  .handle-area {
+    position:absolute; bottom:30px; right:30px;
+    width:80px; height:80px;
+  }
+  .handle-base {
+    position:absolute; inset:0;
+    background: radial-gradient(circle at 50% 50%, #f0f0f0, #c0c0c0);
+    border-radius:50%;
+    box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3),
+                inset 0 5px 10px rgba(255,255,255,0.5),
+                0 4px 8px rgba(0,0,0,0.3);
+  }
+  .handle {
+    position:absolute; inset:0;
+    cursor:grab;
+    transition: transform 0.05s linear;
+  }
+  .handle:active { cursor:grabbing; }
+  .handle::before {
+    content:''; position:absolute;
+    top:50%; left:50%;
+    width:60px; height:14px;
+    background: linear-gradient(180deg, #ffd700, #b8860b);
+    border-radius:7px;
+    transform:translate(-50%,-50%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4),
+                inset 0 2px 4px rgba(255,255,255,0.5);
+  }
+  .handle::after {
+    content:''; position:absolute;
+    top:50%; left:50%;
+    width:18px; height:18px;
+    background: radial-gradient(circle, #fff, #aaa);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.3);
+  }
+  .handle.spinning { animation: handleSpin 0.5s linear infinite; }
+  @keyframes handleSpin {
+    from { transform:rotate(0); }
+    to { transform:rotate(360deg); }
+  }
+
+  /* 台座 */
+  .base {
+    width:340px; height:30px; margin:-5px auto 0;
+    background: linear-gradient(180deg, #8b4513, #5d2f0a);
+    border-radius:10px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+  }
+
+  /* マシンの揺れ */
+  .gacha-machine.shaking { animation: machineShake 0.15s ease-in-out infinite; }
+  @keyframes machineShake {
+    0%,100% { transform:translateX(0) rotate(0); }
+    25% { transform:translateX(-3px) rotate(-0.5deg); }
+    75% { transform:translateX(3px) rotate(0.5deg); }
+  }
+
+  .hint {
+    margin-top:25px; color:#a86b8c; font-size:0.95em; font-weight:bold;
+    background:rgba(255,255,255,0.7); padding:10px 20px; border-radius:25px;
+    display:inline-block;
+    box-shadow:0 3px 8px rgba(255,150,180,0.3);
+  }
+  .hint .arrow { display:inline-block; animation: pointArrow 1s ease-in-out infinite; }
+  @keyframes pointArrow {
+    0%,100% { transform:translateX(0); }
+    50% { transform:translateX(8px); }
+  }
+
+  /* === モーダル === */
   .modal {
-    position:fixed; inset:0; background:rgba(0,0,0,0.7);
-    display:none; justify-content:center; align-items:center; z-index:100;
-    padding:20px;
+    position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    display:none; justify-content:center; align-items:center; z-index:200;
+    padding:20px; backdrop-filter: blur(4px);
   }
-  .modal.show { display:flex; animation: fadeIn 0.3s; }
+  .modal.show { display:flex; animation: fadeIn 0.4s; }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
   .modal-content {
-    background:#fff; padding:35px 25px; border-radius:20px;
+    background: linear-gradient(135deg, #fff 0%, #fff5f9 100%);
+    padding:40px 28px; border-radius:30px;
     max-width:420px; width:100%; text-align:center;
-    box-shadow:0 20px 60px rgba(0,0,0,0.3);
-    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow:0 20px 60px rgba(255,107,157,0.4),
+               0 0 0 8px rgba(255,255,255,0.5);
+    animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    position:relative;
+    border: 3px dashed #ffb8d4;
   }
-  @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+  @keyframes popIn { 
+    0% { transform:scale(0.3) rotate(-10deg); opacity:0; }
+    100% { transform:scale(1) rotate(0); opacity:1; }
+  }
 
-  .question-label { color:#ee5a52; font-size:0.9em; margin-bottom:15px; letter-spacing:0.2em; }
-  .question-text { font-size:1.4em; color:#333; line-height:1.6; margin-bottom:30px; font-weight:bold; }
-  .btn-group { display:flex; gap:10px; flex-direction:column; }
+  .modal-content::before {
+    content:'🎀'; position:absolute; top:-25px; left:50%;
+    transform:translateX(-50%);
+    font-size:3em;
+    animation: ribbonBounce 1s ease-in-out infinite;
+  }
+  @keyframes ribbonBounce {
+    0%,100% { transform:translateX(-50%) translateY(0); }
+    50% { transform:translateX(-50%) translateY(-8px); }
+  }
+
+  .question-label {
+    color:#ff6b9d; font-size:0.85em; margin:15px 0 18px;
+    letter-spacing:0.3em; font-weight:bold;
+  }
+  .question-text {
+    font-size:1.35em; color:#4a3540; line-height:1.7;
+    margin-bottom:30px; font-weight:bold;
+    padding:20px 15px;
+    background: rgba(255,228,236,0.5);
+    border-radius:15px;
+  }
+  .btn-group { display:flex; gap:12px; flex-direction:column; }
   .btn {
-    padding:14px 20px; border:none; border-radius:30px;
+    padding:15px 20px; border:none; border-radius:30px;
     font-size:1em; font-weight:bold; cursor:pointer;
-    transition:transform 0.2s, box-shadow 0.2s;
+    transition:all 0.2s;
+    font-family:inherit;
   }
-  .btn:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,0.2); }
-  .btn-primary { background:linear-gradient(135deg, #ff6b6b, #ee5a52); color:#fff; }
-  .btn-secondary { background:#f0f0f0; color:#555; }
+  .btn:hover { transform:translateY(-3px); }
+  .btn:active { transform:translateY(0); }
+  .btn-primary {
+    background:linear-gradient(135deg, #ff8fb1, #ff5188);
+    color:#fff;
+    box-shadow:0 4px 0 #c93063, 0 6px 12px rgba(255,107,157,0.4);
+  }
+  .btn-primary:hover { box-shadow:0 6px 0 #c93063, 0 10px 16px rgba(255,107,157,0.5); }
+  .btn-secondary {
+    background:#fff; color:#ff6b9d; border:2px solid #ffb8d4;
+    box-shadow:0 4px 0 #ffb8d4;
+  }
+  .btn-secondary:hover { box-shadow:0 6px 0 #ffb8d4; }
 
-  /* 紙吹雪 */
-  .confetti { position:fixed; width:10px; height:10px; pointer-events:none; z-index:99; }
+  /* キラキラエフェクト */
+  .sparkle {
+    position:fixed; pointer-events:none; z-index:150;
+    font-size:1.8em;
+  }
+
+  @media (max-width:360px) {
+    .gacha-machine, .dome { width:260px; }
+    .body-section { width:260px; }
+    .base { width:300px; }
+    .dome { height:200px; }
+    h1 { font-size:1.9em; }
+  }
 </style>
 </head>
 <body>
+  <!-- 背景の浮遊装飾 -->
+  <div class="floating-deco" style="left:5%; animation-duration:15s;">🌸</div>
+  <div class="floating-deco" style="left:20%; animation-duration:20s; animation-delay:3s;">⭐</div>
+  <div class="floating-deco" style="left:40%; animation-duration:18s; animation-delay:6s;">🌸</div>
+  <div class="floating-deco" style="left:65%; animation-duration:22s; animation-delay:2s;">💫</div>
+  <div class="floating-deco" style="left:85%; animation-duration:16s; animation-delay:8s;">🎀</div>
+  <div class="floating-deco" style="left:95%; animation-duration:19s; animation-delay:5s;">⭐</div>
+
   <div class="container">
-    <h1>🎰 問いガチャ 🎰</h1>
-    <div class="gacha">
-      <div class="gacha-window">
-        <div class="gacha-window-text" id="windowText">回してね！</div>
+    <h1>問いガチャ</h1>
+    <p class="subtitle">✨ 答えのない問いを、みんなで考えよう ✨</p>
+
+    <div class="gacha-machine" id="machine">
+      <!-- カプセルドーム -->
+      <div class="dome">
+        <div class="capsules" id="capsules">
+          <div class="capsule c1"></div><div class="capsule c2"></div>
+          <div class="capsule c3"></div><div class="capsule c4"></div>
+          <div class="capsule c5"></div><div class="capsule c1"></div>
+          <div class="capsule c2"></div><div class="capsule c3"></div>
+          <div class="capsule c4"></div><div class="capsule c5"></div>
+          <div class="capsule c1"></div><div class="capsule c2"></div>
+          <div class="capsule c3"></div><div class="capsule c4"></div>
+          <div class="capsule c5"></div>
+        </div>
       </div>
-      <div class="gacha-knob" id="knob"></div>
+
+      <!-- 本体 -->
+      <div class="body-section">
+        <div class="logo-label">QUESTION</div>
+        <div class="slot">
+          <div class="slot-message" id="slotMessage">
+            ハンドルを<br>くるくる回してね♪
+          </div>
+          <div class="falling-capsule" id="fallingCapsule"></div>
+        </div>
+        <div class="handle-area">
+          <div class="handle-base"></div>
+          <div class="handle" id="handle"></div>
+        </div>
+      </div>
     </div>
-    <p class="hint">つまみを指でスワイプ（回転）してください</p>
+    <div class="base"></div>
+
+    <p class="hint">👉 ハンドルを指で回そう <span class="arrow">→</span></p>
   </div>
 
+  <!-- モーダル -->
   <div class="modal" id="modal">
     <div class="modal-content">
       <div class="question-label">— 今日の問い —</div>
@@ -101,7 +389,6 @@
   </div>
 
 <script>
-  // デフォルト問い（管理者が未登録の場合のサンプル）
   const DEFAULT_QUESTIONS = [
     "もし明日世界が終わるなら、最後に誰と何を話したい？",
     "あなたにとって「自由」とは何ですか？",
@@ -119,17 +406,66 @@
     return DEFAULT_QUESTIONS;
   }
 
-  const knob = document.getElementById('knob');
+  const handle = document.getElementById('handle');
+  const machine = document.getElementById('machine');
+  const capsules = document.getElementById('capsules');
+  const slotMessage = document.getElementById('slotMessage');
+  const fallingCapsule = document.getElementById('fallingCapsule');
   const modal = document.getElementById('modal');
   const questionText = document.getElementById('questionText');
-  const windowText = document.getElementById('windowText');
 
   let isDragging = false;
-  let startAngle = 0;
+  let lastAngle = 0;
   let totalRotation = 0;
+  let currentRotation = 0;
   let isSpinning = false;
 
-  function getAngle(e, rect) {
+  // === 効果音（Web Audio APIで生成） ===
+  let audioCtx;
+  function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  function playClick() {
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.value = 800; o.type = 'square';
+    g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+    o.start(); o.stop(audioCtx.currentTime + 0.05);
+  }
+  function playDrop() {
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.setValueAtTime(400, audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+    o.type = 'sine';
+    g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    o.start(); o.stop(audioCtx.currentTime + 0.3);
+  }
+  function playFanfare() {
+    if (!audioCtx) return;
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, i) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.frequency.value = freq; o.type = 'triangle';
+      const t = audioCtx.currentTime + i * 0.1;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.2, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      o.start(t); o.stop(t + 0.3);
+    });
+  }
+
+  // === ハンドル操作 ===
+  function getAngle(e) {
+    const rect = handle.getBoundingClientRect();
     const cx = rect.left + rect.width/2;
     const cy = rect.top + rect.height/2;
     const x = (e.touches ? e.touches[0].clientX : e.clientX) - cx;
@@ -139,91 +475,129 @@
 
   function startDrag(e) {
     if (isSpinning) return;
+    initAudio();
     isDragging = true;
-    const rect = knob.getBoundingClientRect();
-    startAngle = getAngle(e, rect);
+    lastAngle = getAngle(e);
     totalRotation = 0;
     e.preventDefault();
   }
 
+  let lastClickRotation = 0;
   function moveDrag(e) {
     if (!isDragging) return;
-    const rect = knob.getBoundingClientRect();
-    const currentAngle = getAngle(e, rect);
-    let diff = currentAngle - startAngle;
+    const currentAngle = getAngle(e);
+    let diff = currentAngle - lastAngle;
     if (diff > 180) diff -= 360;
     if (diff < -180) diff += 360;
     totalRotation += Math.abs(diff);
-    startAngle = currentAngle;
-    knob.style.transform = `translateX(-50%) rotate(${totalRotation}deg)`;
+    currentRotation += diff;
+    lastAngle = currentAngle;
+    handle.style.transform = `rotate(${currentRotation}deg)`;
 
-    if (totalRotation > 360) {
-      triggerGacha();
+    // カチカチ音を出す
+    if (totalRotation - lastClickRotation > 30) {
+      playClick();
+      lastClickRotation = totalRotation;
+      // カプセルを揺らす
+      capsules.querySelectorAll('.capsule').forEach(c => {
+        if (Math.random() > 0.7) {
+          c.classList.add('shake');
+          setTimeout(()=>c.classList.remove('shake'), 300);
+        }
+      });
     }
+
+    if (totalRotation > 360) triggerGacha();
     e.preventDefault();
   }
 
   function endDrag() { isDragging = false; }
 
+  // === ガチャ演出 ===
   function triggerGacha() {
     if (isSpinning) return;
     isSpinning = true;
     isDragging = false;
-    knob.classList.add('spinning');
-    windowText.textContent = '🎲 回転中... 🎲';
+
+    // 1. マシンが揺れる + ハンドル自動回転 + カプセル全揺れ
+    machine.classList.add('shaking');
+    handle.classList.add('spinning');
+    capsules.querySelectorAll('.capsule').forEach(c => c.classList.add('shake'));
+    slotMessage.innerHTML = '🎲 ガラガラガラ... 🎲';
+
+    // 連続クリック音
+    let clickInterval = setInterval(playClick, 100);
 
     setTimeout(() => {
-      const questions = getQuestions();
-      const picked = questions[Math.floor(Math.random() * questions.length)];
-      knob.classList.remove('spinning');
-      knob.style.transform = 'translateX(-50%) rotate(0)';
-      totalRotation = 0;
-      windowText.textContent = '✨ Get! ✨';
-      showConfetti();
+      clearInterval(clickInterval);
+      machine.classList.remove('shaking');
+      handle.classList.remove('spinning');
+      capsules.querySelectorAll('.capsule').forEach(c => c.classList.remove('shake'));
+      slotMessage.innerHTML = '';
+
+      // 2. カプセルが落ちてくる
+      const colors = [
+        'linear-gradient(135deg, #ff9eb5, #ff6b9d)',
+        'linear-gradient(135deg, #a8e6f0, #6bcfee)',
+        'linear-gradient(135deg, #ffe69e, #ffd166)',
+        'linear-gradient(135deg, #c8a8f0, #a875e0)',
+        'linear-gradient(135deg, #b5e8a8, #82d670)'
+      ];
+      fallingCapsule.style.background = colors[Math.floor(Math.random()*colors.length)];
+      fallingCapsule.classList.remove('drop');
+      void fallingCapsule.offsetWidth; // リセット
+      fallingCapsule.classList.add('drop');
+      setTimeout(playDrop, 800);
+
+      // 3. 1.5秒後にモーダル表示
       setTimeout(() => {
+        playFanfare();
+        showSparkles();
+        const questions = getQuestions();
+        const picked = questions[Math.floor(Math.random() * questions.length)];
         questionText.textContent = picked;
         modal.classList.add('show');
-        isSpinning = false;
-      }, 400);
-    }, 2000);
+        // リセット
+        setTimeout(() => {
+          fallingCapsule.classList.remove('drop');
+          slotMessage.innerHTML = 'ハンドルを<br>くるくる回してね♪';
+          handle.style.transform = 'rotate(0)';
+          currentRotation = 0;
+          totalRotation = 0;
+          lastClickRotation = 0;
+          isSpinning = false;
+        }, 500);
+      }, 1500);
+    }, 1800);
   }
 
-  function showConfetti() {
-    const colors = ['#ff6b6b','#ffd700','#4ecdc4','#95e1d3','#f38181'];
-    for (let i = 0; i < 30; i++) {
-      const c = document.createElement('div');
-      c.className = 'confetti';
-      c.style.left = Math.random()*100 + '%';
-      c.style.top = '50%';
-      c.style.background = colors[Math.floor(Math.random()*colors.length)];
-      c.style.transform = `rotate(${Math.random()*360}deg)`;
-      document.body.appendChild(c);
-      const dx = (Math.random()-0.5)*400;
-      const dy = (Math.random()-0.3)*-500;
-      c.animate([
-        { transform:'translate(0,0) rotate(0)', opacity:1 },
-        { transform:`translate(${dx}px,${dy*-1+300}px) rotate(720deg)`, opacity:0 }
-      ], { duration:1500, easing:'ease-out' });
-      setTimeout(()=>c.remove(), 1500);
+  function showSparkles() {
+    const emojis = ['✨','⭐','🌟','💫','🎀','🌸'];
+    for (let i = 0; i < 25; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      s.style.left = Math.random()*100 + 'vw';
+      s.style.top = '50vh';
+      document.body.appendChild(s);
+      const dx = (Math.random()-0.5)*600;
+      const dy = (Math.random()-0.5)*600;
+      s.animate([
+        { transform:'translate(0,0) scale(0) rotate(0)', opacity:1 },
+        { transform:`translate(${dx}px,${dy}px) scale(1.5) rotate(720deg)`, opacity:0 }
+      ], { duration:1800, easing:'ease-out' });
+      setTimeout(()=>s.remove(), 1800);
     }
   }
 
-  function spinAgain() {
-    modal.classList.remove('show');
-    windowText.textContent = '回してね！';
-  }
+  function spinAgain() { modal.classList.remove('show'); }
+  function backToTitle() { modal.classList.remove('show'); window.scrollTo(0,0); }
 
-  function backToTitle() {
-    modal.classList.remove('show');
-    windowText.textContent = '回してね！';
-    window.scrollTo(0,0);
-  }
-
-  // イベント登録（タッチ＆マウス両対応）
-  knob.addEventListener('mousedown', startDrag);
+  // イベント登録
+  handle.addEventListener('mousedown', startDrag);
   window.addEventListener('mousemove', moveDrag);
   window.addEventListener('mouseup', endDrag);
-  knob.addEventListener('touchstart', startDrag, {passive:false});
+  handle.addEventListener('touchstart', startDrag, {passive:false});
   window.addEventListener('touchmove', moveDrag, {passive:false});
   window.addEventListener('touchend', endDrag);
 </script>
