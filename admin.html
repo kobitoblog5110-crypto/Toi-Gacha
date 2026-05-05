@@ -1,0 +1,140 @@
+<!-- File: admin.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>問いガチャ｜管理画面</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Hiragino Sans','Yu Gothic',sans-serif;
+    background:#2c3e50; color:#fff; min-height:100vh; padding:20px;
+  }
+  .container { max-width:600px; margin:0 auto; }
+  h1 { text-align:center; margin-bottom:30px; font-size:1.8em; }
+
+  .login-box, .admin-box {
+    background:#34495e; padding:30px; border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  }
+  .admin-box { display:none; }
+
+  input[type=password], input[type=text] {
+    width:100%; padding:12px; border:none; border-radius:8px;
+    font-size:1em; margin-bottom:15px;
+  }
+  button {
+    width:100%; padding:12px; border:none; border-radius:8px;
+    background:#e74c3c; color:#fff; font-size:1em; font-weight:bold;
+    cursor:pointer; transition:background 0.2s;
+  }
+  button:hover { background:#c0392b; }
+  button.secondary { background:#7f8c8d; }
+  button.secondary:hover { background:#5d6d6e; }
+
+  .question-list { margin-top:20px; }
+  .question-item {
+    background:#2c3e50; padding:12px 15px; margin-bottom:8px;
+    border-radius:8px; display:flex; justify-content:space-between; align-items:center;
+    gap:10px;
+  }
+  .question-item span { flex:1; word-break:break-word; }
+  .question-item button {
+    width:auto; padding:6px 12px; font-size:0.85em;
+    background:#95a5a6;
+  }
+  .info { background:#16a085; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.9em; }
+  .error { color:#e74c3c; margin-top:10px; text-align:center; font-weight:bold; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 問いガチャ 管理画面</h1>
+
+    <!-- ログイン -->
+    <div class="login-box" id="loginBox">
+      <p style="margin-bottom:15px;">管理者パスワードを入力してください</p>
+      <input type="password" id="pwInput" placeholder="パスワード">
+      <button onclick="login()">ログイン</button>
+      <p class="error" id="errMsg"></p>
+    </div>
+
+    <!-- 編集画面 -->
+    <div class="admin-box" id="adminBox">
+      <div class="info">💡 ここで追加した問いは、公開用ガチャに反映されます</div>
+
+      <input type="text" id="newQuestion" placeholder="新しい問いを入力（例: 幸せとは何ですか？）">
+      <button onclick="addQuestion()">＋ 問いを追加</button>
+
+      <div class="question-list" id="questionList"></div>
+
+      <button class="secondary" style="margin-top:20px;" onclick="logout()">ログアウト</button>
+    </div>
+  </div>
+
+<script>
+  // 🔑 パスワードはここで変更してください
+  const ADMIN_PASSWORD = "mypass1234";
+
+  function login() {
+    const input = document.getElementById('pwInput').value;
+    if (input === ADMIN_PASSWORD) {
+      document.getElementById('loginBox').style.display='none';
+      document.getElementById('adminBox').style.display='block';
+      renderList();
+    } else {
+      document.getElementById('errMsg').textContent='パスワードが違います';
+    }
+  }
+
+  function logout() {
+    document.getElementById('loginBox').style.display='block';
+    document.getElementById('adminBox').style.display='none';
+    document.getElementById('pwInput').value='';
+    document.getElementById('errMsg').textContent='';
+  }
+
+  function getQuestions() {
+    const s = localStorage.getItem('toiGachaQuestions');
+    return s ? JSON.parse(s) : [];
+  }
+  function saveQuestions(arr) {
+    localStorage.setItem('toiGachaQuestions', JSON.stringify(arr));
+  }
+
+  function addQuestion() {
+    const input = document.getElementById('newQuestion');
+    const text = input.value.trim();
+    if (!text) return;
+    const arr = getQuestions();
+    arr.push(text);
+    saveQuestions(arr);
+    input.value='';
+    renderList();
+  }
+
+  function deleteQuestion(idx) {
+    const arr = getQuestions();
+    arr.splice(idx,1);
+    saveQuestions(arr);
+    renderList();
+  }
+
+  function renderList() {
+    const arr = getQuestions();
+    const list = document.getElementById('questionList');
+    if (arr.length===0) {
+      list.innerHTML='<p style="text-align:center;color:#bdc3c7;margin-top:15px;">まだ問いがありません</p>';
+      return;
+    }
+    list.innerHTML = arr.map((q,i)=>`
+      <div class="question-item">
+        <span>${i+1}. ${q.replace(/</g,'&lt;')}</span>
+        <button onclick="deleteQuestion(${i})">削除</button>
+      </div>
+    `).join('');
+  }
+</script>
+</body>
+</html>

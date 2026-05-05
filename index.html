@@ -1,0 +1,231 @@
+<!-- File: index.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>問いガチャ | Podcast企画</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    min-height: 100vh; display:flex; justify-content:center; align-items:center;
+    overflow:hidden; user-select:none;
+  }
+  .container { text-align:center; padding:20px; max-width:500px; width:100%; }
+  h1 { font-size:2.2em; color:#5a3921; margin-bottom:30px; text-shadow:2px 2px 4px rgba(255,255,255,0.5); }
+
+  /* ガチャ本体 */
+  .gacha {
+    width:280px; height:340px; margin:0 auto; position:relative;
+    background:linear-gradient(180deg, #ff6b6b 0%, #ee5a52 50%, #c0392b 50%, #a93226 100%);
+    border-radius:20px; box-shadow:0 15px 40px rgba(0,0,0,0.3);
+  }
+  .gacha-window {
+    position:absolute; top:30px; left:50%; transform:translateX(-50%);
+    width:200px; height:140px; background:rgba(255,255,255,0.95);
+    border-radius:15px; border:5px solid #8b4513;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .gacha-window-text { font-size:1em; color:#333; font-weight:bold; padding:10px; text-align:center; }
+
+  /* つまみ（スワイプ部分） */
+  .gacha-knob {
+    position:absolute; bottom:30px; left:50%; transform:translateX(-50%);
+    width:90px; height:90px; background:radial-gradient(circle at 35% 35%, #ffd700, #b8860b);
+    border-radius:50%; cursor:grab; box-shadow:0 5px 15px rgba(0,0,0,0.4);
+    display:flex; align-items:center; justify-content:center;
+    transition: transform 0.1s;
+  }
+  .gacha-knob.spinning { animation: spin 0.6s linear infinite; }
+  @keyframes spin { from{transform:translateX(-50%) rotate(0)} to{transform:translateX(-50%) rotate(360deg)} }
+  .gacha-knob::before { content:'➤'; color:#fff; font-size:1.8em; }
+
+  .hint { margin-top:20px; color:#5a3921; font-size:0.95em; }
+
+  /* モーダル */
+  .modal {
+    position:fixed; inset:0; background:rgba(0,0,0,0.7);
+    display:none; justify-content:center; align-items:center; z-index:100;
+    padding:20px;
+  }
+  .modal.show { display:flex; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal-content {
+    background:#fff; padding:35px 25px; border-radius:20px;
+    max-width:420px; width:100%; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+
+  .question-label { color:#ee5a52; font-size:0.9em; margin-bottom:15px; letter-spacing:0.2em; }
+  .question-text { font-size:1.4em; color:#333; line-height:1.6; margin-bottom:30px; font-weight:bold; }
+  .btn-group { display:flex; gap:10px; flex-direction:column; }
+  .btn {
+    padding:14px 20px; border:none; border-radius:30px;
+    font-size:1em; font-weight:bold; cursor:pointer;
+    transition:transform 0.2s, box-shadow 0.2s;
+  }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,0.2); }
+  .btn-primary { background:linear-gradient(135deg, #ff6b6b, #ee5a52); color:#fff; }
+  .btn-secondary { background:#f0f0f0; color:#555; }
+
+  /* 紙吹雪 */
+  .confetti { position:fixed; width:10px; height:10px; pointer-events:none; z-index:99; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎰 問いガチャ 🎰</h1>
+    <div class="gacha">
+      <div class="gacha-window">
+        <div class="gacha-window-text" id="windowText">回してね！</div>
+      </div>
+      <div class="gacha-knob" id="knob"></div>
+    </div>
+    <p class="hint">つまみを指でスワイプ（回転）してください</p>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="question-label">— 今日の問い —</div>
+      <div class="question-text" id="questionText"></div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="spinAgain()">🔄 もういちど回す</button>
+        <button class="btn btn-secondary" onclick="backToTitle()">🏠 タイトルに戻る</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // デフォルト問い（管理者が未登録の場合のサンプル）
+  const DEFAULT_QUESTIONS = [
+    "もし明日世界が終わるなら、最後に誰と何を話したい？",
+    "あなたにとって「自由」とは何ですか？",
+    "10年前の自分に一言だけ伝えられるとしたら？",
+    "幸せの定義を、自分の言葉で言うと？",
+    "失敗から学んだ最大のことは何ですか？"
+  ];
+
+  function getQuestions() {
+    const stored = localStorage.getItem('toiGachaQuestions');
+    if (stored) {
+      const arr = JSON.parse(stored);
+      if (arr.length > 0) return arr;
+    }
+    return DEFAULT_QUESTIONS;
+  }
+
+  const knob = document.getElementById('knob');
+  const modal = document.getElementById('modal');
+  const questionText = document.getElementById('questionText');
+  const windowText = document.getElementById('windowText');
+
+  let isDragging = false;
+  let startAngle = 0;
+  let totalRotation = 0;
+  let isSpinning = false;
+
+  function getAngle(e, rect) {
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - cx;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - cy;
+    return Math.atan2(y, x) * 180 / Math.PI;
+  }
+
+  function startDrag(e) {
+    if (isSpinning) return;
+    isDragging = true;
+    const rect = knob.getBoundingClientRect();
+    startAngle = getAngle(e, rect);
+    totalRotation = 0;
+    e.preventDefault();
+  }
+
+  function moveDrag(e) {
+    if (!isDragging) return;
+    const rect = knob.getBoundingClientRect();
+    const currentAngle = getAngle(e, rect);
+    let diff = currentAngle - startAngle;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    totalRotation += Math.abs(diff);
+    startAngle = currentAngle;
+    knob.style.transform = `translateX(-50%) rotate(${totalRotation}deg)`;
+
+    if (totalRotation > 360) {
+      triggerGacha();
+    }
+    e.preventDefault();
+  }
+
+  function endDrag() { isDragging = false; }
+
+  function triggerGacha() {
+    if (isSpinning) return;
+    isSpinning = true;
+    isDragging = false;
+    knob.classList.add('spinning');
+    windowText.textContent = '🎲 回転中... 🎲';
+
+    setTimeout(() => {
+      const questions = getQuestions();
+      const picked = questions[Math.floor(Math.random() * questions.length)];
+      knob.classList.remove('spinning');
+      knob.style.transform = 'translateX(-50%) rotate(0)';
+      totalRotation = 0;
+      windowText.textContent = '✨ Get! ✨';
+      showConfetti();
+      setTimeout(() => {
+        questionText.textContent = picked;
+        modal.classList.add('show');
+        isSpinning = false;
+      }, 400);
+    }, 2000);
+  }
+
+  function showConfetti() {
+    const colors = ['#ff6b6b','#ffd700','#4ecdc4','#95e1d3','#f38181'];
+    for (let i = 0; i < 30; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random()*100 + '%';
+      c.style.top = '50%';
+      c.style.background = colors[Math.floor(Math.random()*colors.length)];
+      c.style.transform = `rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(c);
+      const dx = (Math.random()-0.5)*400;
+      const dy = (Math.random()-0.3)*-500;
+      c.animate([
+        { transform:'translate(0,0) rotate(0)', opacity:1 },
+        { transform:`translate(${dx}px,${dy*-1+300}px) rotate(720deg)`, opacity:0 }
+      ], { duration:1500, easing:'ease-out' });
+      setTimeout(()=>c.remove(), 1500);
+    }
+  }
+
+  function spinAgain() {
+    modal.classList.remove('show');
+    windowText.textContent = '回してね！';
+  }
+
+  function backToTitle() {
+    modal.classList.remove('show');
+    windowText.textContent = '回してね！';
+    window.scrollTo(0,0);
+  }
+
+  // イベント登録（タッチ＆マウス両対応）
+  knob.addEventListener('mousedown', startDrag);
+  window.addEventListener('mousemove', moveDrag);
+  window.addEventListener('mouseup', endDrag);
+  knob.addEventListener('touchstart', startDrag, {passive:false});
+  window.addEventListener('touchmove', moveDrag, {passive:false});
+  window.addEventListener('touchend', endDrag);
+</script>
+</body>
+</html>
