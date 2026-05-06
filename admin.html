@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>🔐 星詠みの問いガチャ ｜ 管理画面</title>
+<title>🔐 問いガチャ ｜ 管理画面</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -127,12 +127,12 @@
 <body>
 
 <div class="container">
-  <h1>🔐 星詠み 管理画面</h1>
+  <h1>🔐 管理画面</h1>
   <div class="sub">— 問いの登録・編集・削除 —</div>
 
   <div class="login-box show" id="loginBox">
     <div class="alert" id="loginAlert">パスワードが違います</div>
-    <input type="password" id="pwInput" placeholder="agtm2486" autofocus />
+    <input type="password" id="pwInput" placeholder="管理者パスワードを入力" autofocus />
     <button id="loginBtn">🔓 ログイン</button>
   </div>
 
@@ -171,7 +171,7 @@
 </div>
 
 <script>
-const ADMIN_PW = 'cosmic2026'; // ←ここを変更してください
+const ADMIN_PW = 'agtm2486'; // ←ここを変更してください
 const KEY_QS = 'cosmic_questions_v1';
 const KEY_STATE = 'cosmic_state_v2';
 const SESSION_KEY = 'cosmic_admin_session';
