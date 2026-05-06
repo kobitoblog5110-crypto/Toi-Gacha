@@ -1,0 +1,335 @@
+<!-- File: admin.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>🔐 星詠みの問いガチャ ｜ 管理画面</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Hiragino Sans","Yu Gothic",sans-serif;
+    background: linear-gradient(160deg,#1a0533,#2d1b5e,#0a1a4a);
+    min-height: 100vh;
+    color: #fff;
+    padding: 30px 20px;
+  }
+  .container {
+    max-width: 720px; margin: 0 auto;
+    background: rgba(20,10,50,0.6);
+    border: 1px solid rgba(255,215,0,0.4);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 0 40px rgba(180,120,255,0.3);
+    backdrop-filter: blur(8px);
+  }
+  h1 {
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: #ffd9a8;
+    letter-spacing: 0.15em;
+  }
+  .sub { font-size: 12px; opacity: 0.6; margin-bottom: 24px; }
+  .login-box, .admin-box { display: none; }
+  .login-box.show, .admin-box.show { display: block; }
+
+  input, textarea, button { font-family: inherit; font-size: 14px; }
+  input[type="password"], input[type="text"], textarea {
+    width: 100%; padding: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 6px;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  textarea { min-height: 80px; resize: vertical; }
+  input:focus, textarea:focus {
+    outline: none; border-color: #ffd700;
+    box-shadow: 0 0 12px rgba(255,215,0,0.3);
+  }
+
+  button {
+    padding: 10px 18px;
+    background: linear-gradient(135deg,#ffd700,#ff9ed4);
+    color: #1a0533;
+    border: none; border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+  }
+  button:hover { opacity: 0.9; }
+  button.danger {
+    background: rgba(255,80,80,0.8);
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  button.ghost {
+    background: transparent;
+    color: #ffd9a8;
+    border: 1px solid #ffd9a8;
+  }
+
+  .qlist {
+    margin-top: 24px;
+    border-top: 1px solid rgba(255,215,0,0.2);
+    padding-top: 20px;
+  }
+  .qitem {
+    background: rgba(255,255,255,0.05);
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    border-left: 3px solid #ffd700;
+  }
+  .qtext { flex: 1; line-height: 1.6; }
+  .empty {
+    text-align: center; opacity: 0.5;
+    padding: 30px; font-size: 13px;
+  }
+  .tools {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .count {
+    color: #ffd700; font-size: 13px;
+    margin-bottom: 8px;
+  }
+  .links {
+    margin-top: 24px; padding-top: 20px;
+    border-top: 1px solid rgba(255,215,0,0.2);
+    font-size: 12px; opacity: 0.7;
+  }
+  .links a { color: #ffd9a8; }
+  .alert {
+    padding: 10px;
+    background: rgba(255,80,80,0.2);
+    border: 1px solid rgba(255,80,80,0.5);
+    border-radius: 6px;
+    font-size: 13px; margin-bottom: 12px;
+    display: none;
+  }
+  .alert.show { display: block; }
+  .section-title {
+    margin-top: 24px;
+    font-size: 13px;
+    color: #ffd9a8;
+    letter-spacing: 0.15em;
+    border-left: 3px solid #ffd700;
+    padding-left: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🔐 星詠み 管理画面</h1>
+  <div class="sub">— 問いの登録・編集・削除 —</div>
+
+  <div class="login-box show" id="loginBox">
+    <div class="alert" id="loginAlert">パスワードが違います</div>
+    <input type="password" id="pwInput" placeholder="管理者パスワードを入力" autofocus />
+    <button id="loginBtn">🔓 ログイン</button>
+  </div>
+
+  <div class="admin-box" id="adminBox">
+    <h3 style="margin-bottom:10px;font-size:15px;">＋ 新しい問いを追加</h3>
+    <textarea id="newQ" placeholder="例：あなたが今、本当に大切にしたいことは何ですか？"></textarea>
+    <button id="addBtn">✦ 星に登録する</button>
+
+    <div class="qlist">
+      <div class="count" id="count">登録数: 0</div>
+      <div id="qList"></div>
+    </div>
+
+    <div class="section-title">問いデータ</div>
+    <div class="tools">
+      <button class="ghost" id="exportBtn">📤 JSONエクスポート</button>
+      <button class="ghost" id="importBtn">📥 JSONインポート</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+      <button class="danger" id="clearBtn">🗑 問いを全削除</button>
+    </div>
+
+    <div class="section-title">プレイ状態（コレクション・履歴）</div>
+    <div class="tools">
+      <button class="ghost" id="viewState">📊 統計を見る</button>
+      <button class="danger" id="resetState">🔄 プレイ状態をリセット</button>
+      <button class="ghost" id="logoutBtn">ログアウト</button>
+    </div>
+
+    <div id="statePanel" style="display:none;margin-top:16px;padding:14px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:12px;line-height:1.8;"></div>
+
+    <div class="links">
+      公開URL: <a href="index.html" target="_blank">index.html</a><br>
+      ※ データはこのブラウザの localStorage に保存されます
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PW = 'cosmic2026'; // ←ここを変更してください
+const KEY_QS = 'cosmic_questions_v1';
+const KEY_STATE = 'cosmic_state_v2';
+const SESSION_KEY = 'cosmic_admin_session';
+
+const loginBox = document.getElementById('loginBox');
+const adminBox = document.getElementById('adminBox');
+const pwInput = document.getElementById('pwInput');
+const loginAlert = document.getElementById('loginAlert');
+
+function showAdmin() {
+  loginBox.classList.remove('show');
+  adminBox.classList.add('show');
+  render();
+}
+if (sessionStorage.getItem(SESSION_KEY) === '1') showAdmin();
+
+document.getElementById('loginBtn').addEventListener('click', login);
+pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+function login() {
+  if (pwInput.value === ADMIN_PW) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    showAdmin();
+  } else {
+    loginAlert.classList.add('show');
+    pwInput.value = '';
+  }
+}
+
+function getQs() {
+  try { return JSON.parse(localStorage.getItem(KEY_QS) || '[]'); }
+  catch { return []; }
+}
+function setQs(arr) { localStorage.setItem(KEY_QS, JSON.stringify(arr)); }
+
+function render() {
+  const qs = getQs();
+  document.getElementById('count').textContent = `登録数: ${qs.length}`;
+  const list = document.getElementById('qList');
+  list.innerHTML = '';
+  if (qs.length === 0) {
+    list.innerHTML = '<div class="empty">まだ問いが登録されていません</div>';
+    return;
+  }
+  qs.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'qitem';
+    div.innerHTML = `
+      <div class="qtext">${escapeHTML(q)}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="ghost" data-edit="${i}" style="font-size:12px;padding:6px 10px;">編集</button>
+        <button class="danger" data-del="${i}">削除</button>
+      </div>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', () => {
+      if (confirm('削除しますか？')) {
+        const arr = getQs();
+        arr.splice(+b.dataset.del, 1);
+        setQs(arr); render();
+      }
+    });
+  });
+  list.querySelectorAll('[data-edit]').forEach(b => {
+    b.addEventListener('click', () => {
+      const arr = getQs();
+      const i = +b.dataset.edit;
+      const newText = prompt('問いを編集', arr[i]);
+      if (newText !== null && newText.trim()) {
+        arr[i] = newText.trim();
+        setQs(arr); render();
+      }
+    });
+  });
+}
+
+function escapeHTML(s) {
+  return s.replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[m]);
+}
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  const v = document.getElementById('newQ').value.trim();
+  if (!v) return;
+  const arr = getQs();
+  arr.push(v);
+  setQs(arr);
+  document.getElementById('newQ').value = '';
+  render();
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if (confirm('全ての問いを削除します。本当によろしいですか？')) {
+    setQs([]); render();
+  }
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const data = JSON.stringify(getQs(), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'cosmic_questions.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const arr = JSON.parse(reader.result);
+      if (!Array.isArray(arr)) throw 0;
+      if (confirm(`${arr.length}件の問いをインポートします（既存は上書き）。よろしいですか？`)) {
+        setQs(arr.filter(x => typeof x === 'string'));
+        render();
+      }
+    } catch { alert('JSONの形式が不正です'); }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('viewState').addEventListener('click', () => {
+  const panel = document.getElementById('statePanel');
+  const s = JSON.parse(localStorage.getItem(KEY_STATE) || 'null');
+  if (!s) {
+    panel.innerHTML = 'プレイデータはまだありません';
+  } else {
+    const collected = Object.keys(s.encountered || {}).length;
+    const qs = getQs();
+    panel.innerHTML = `
+      📊 <b>総プレイ数</b>: ${s.totalPlays} 回<br>
+      ⭐ <b>収集</b>: ${collected} / ${qs.length}<br>
+      🔥 <b>最高コンボ</b>: ${s.bestCombo} 連<br>
+      ☀ <b>最終デイリー</b>: ${s.lastDaily || '—'}<br>
+      📜 <b>履歴件数</b>: ${(s.history||[]).length}
+    `;
+  }
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+});
+
+document.getElementById('resetState').addEventListener('click', () => {
+  if (confirm('プレイ状態（コレクション・履歴・コンボ・称号）を全てリセットしますか？\n問いのデータは消えません。')) {
+    localStorage.removeItem(KEY_STATE);
+    alert('リセットしました');
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+});
+</script>
+</body>
+</html>
